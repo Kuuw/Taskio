@@ -12,7 +12,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace BL.Concrete;
+namespace Services.Concrete;
 
 public class AuthService : IAuthService
 {
@@ -63,7 +63,7 @@ public class AuthService : IAuthService
         var user = _userRepository.GetByEmail(userLogin.Email);
         if (user == null) { return ServiceResult<AuthenticateResponse?>.BadRequest("Email or password is invalid."); }
 
-        if (_bcryptService.VerifyPassword(userLogin.Password, user.PasswordHash))
+        if (_bcryptService.VerifyPassword(userLogin.Password, user.Password))
         {
             var token = Generate(user);
             var response = new AuthenticateResponse(user, token);
