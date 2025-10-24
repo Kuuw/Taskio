@@ -25,8 +25,7 @@ public class CategoryController : BaseController
         return HandleServiceResult(_categoryService.GetById(id));
     }
 
-    [HttpGet]
-    [AllowAnonymous]
+    [HttpGet("/FromProjectId/{id}")]
     public IActionResult GetCategoriesFromProject(Guid id)
     {
         return HandleServiceResult(_categoryService.GetFromProject(id));
