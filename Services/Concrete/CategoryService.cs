@@ -3,6 +3,7 @@ using Data.Abstract;
 using Entities.DTO;
 using Entities.Models;
 using AutoMapper;
+using Entities.Context.Abstract;
 
 namespace Services.Concrete;
 
@@ -10,10 +11,12 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
+    protected readonly IUserContext _userContext;
 
-    public CategoryService(ICategoryRepository categoryRepository) : base(categoryRepository)
+    public CategoryService(ICategoryRepository categoryRepository, IUserContext userContext) : base(categoryRepository, userContext)
     {
         _categoryRepository = categoryRepository;
+        _userContext = userContext;
     }
 
     public ServiceResult<List<CategoryGetDto>> GetFromProject(Guid id)

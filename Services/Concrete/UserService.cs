@@ -1,7 +1,8 @@
-using Services.Abstract;
 using Data.Abstract;
+using Entities.Context.Abstract;
 using Entities.DTO;
 using Entities.Models;
+using Services.Abstract;
 
 namespace Services.Concrete;
 
@@ -9,11 +10,13 @@ public class UserService : GenericService<User, UserRegister, UserGetDto, UserPu
 {
     private readonly IUserRepository _userRepository;
     private readonly IBcryptService _bcryptService;
-    
-    public UserService(IUserRepository userRepository, IBcryptService bcryptService) : base(userRepository)
+    protected readonly IUserContext _userContext;
+
+    public UserService(IUserRepository userRepository, IBcryptService bcryptService, IUserContext userContext) : base(userRepository, userContext)
     {
         _userRepository = userRepository;
         _bcryptService = bcryptService;
+        _userContext = userContext;
     }
 
     public ServiceResult<bool> Register(UserRegister userRegister)

@@ -2,6 +2,7 @@
 using Services.Abstract;
 using Data.Abstract;
 using Entities.Models;
+using Entities.Context.Abstract;
 
 namespace Services.Concrete;
 
@@ -9,11 +10,22 @@ public class GenericService<TModel, TPostDto, TGetDto, TPutDto> : IGenericServic
     where TModel : class
 {
     private readonly IGenericRepository<TModel> _repository;
+    protected readonly IUserContext _userContext;
     private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
 
-    public GenericService(IGenericRepository<TModel> repository)
+    public GenericService(IGenericRepository<TModel> repository, IUserContext userContext)
     {
         _repository = repository;
+        _userContext = userContext;
+    }
+
+    protected Guid GetCurrentUserId()
+    {
+        if (_userContext.UserId == Guid.Empty)
+        {
+            throw new UnauthorizedAccessException("User is not authenticated");
+        }
+        return _userContext.UserId;
     }
 
     public ServiceResult<bool> Insert(TPostDto data)
