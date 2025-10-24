@@ -25,6 +25,22 @@ namespace Data.Concrete
             }
         }
 
+        public bool DeleteFromId(Guid id)
+        {
+            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            {
+                var entity = data.Find(id);
+                if (entity == null)
+                {
+                    return false;
+                }
+                data.Remove(entity);
+                _context.SaveChanges();
+                dbContextTransaction.Commit();
+                return true;
+            }
+        }
+
         public T? GetById(Guid id)
         {
             return data.Find(id);
