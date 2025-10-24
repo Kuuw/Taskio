@@ -70,12 +70,26 @@ builder.Services.AddOpenApi(options =>
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUi(options =>
+    {
+        options.DocumentPath = "openapi/v1.json";
+    });
 }
+
+app.UseCors("AllowAll");
 
 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
