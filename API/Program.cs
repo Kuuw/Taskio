@@ -1,7 +1,14 @@
 using API.Middlewares;
+using Data;
+using Data.Abstract;
+using Data.Concrete;
+using Entities.Context.Abstract;
+using Entities.Context.Concrete;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Services.Abstract;
+using Services.Concrete;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,6 +73,21 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
+builder.Services.AddDbContext<TaskioContext>();
+builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IBcryptService, BcryptService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMapperConfig, MapperConfig>();
+builder.Services.AddAutoMapper(typeof(MapperConfig));
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
