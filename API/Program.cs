@@ -14,7 +14,6 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services
@@ -74,7 +73,7 @@ builder.Services.AddOpenApi(options =>
 });
 
 builder.Services.AddDbContext<TaskioContext>();
-builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddScoped<IUserContext>(sp => new UserContext());
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
@@ -90,7 +89,6 @@ builder.Services.AddScoped<IMapperConfig, MapperConfig>();
 builder.Services.AddAutoMapper(typeof(MapperConfig));
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
 {
