@@ -4,18 +4,21 @@ using Entities.DTO;
 using Entities.Models;
 using AutoMapper;
 using Entities.Context.Abstract;
+using System.Linq;
 
 namespace Services.Concrete;
 
 public class CategoryService : GenericService<Category, CategoryPostDto, CategoryGetDto, CategoryPutDto>, ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IProjectRepository _projectRepository;
     private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
     protected readonly IUserContext _userContext;
 
-    public CategoryService(ICategoryRepository categoryRepository, IUserContext userContext) : base(categoryRepository, userContext)
+    public CategoryService(ICategoryRepository categoryRepository, IProjectRepository projectRepository, IUserContext userContext) : base(categoryRepository, userContext)
     {
         _categoryRepository = categoryRepository;
+        _projectRepository = projectRepository;
         _userContext = userContext;
     }
 
@@ -54,11 +57,16 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
 
     public new ServiceResult<bool> Insert(CategoryPostDto data)
     {
-        var validationResult = ValidateCategoryAccess(data.ProjectId, "create in");
-        if (validationResult != null)
+        var project = _projectRepository.GetById(data.ProjectId);
+        if (project == null)
         {
-            return validationResult;
+            return ServiceResult<bool>.NotFound("Project not found.");
         }
+        if (!project.ProjectUsers.Select(x => x.UserId).Contains(_userContext.UserId))
+        {
+            return ServiceResult<bool>.Unauthorized("You do not have permission to create categories in this project.");
+        }
+
         return base.Insert(data);
     }
 
@@ -69,7 +77,7 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         {
             return ServiceResult<bool>.NotFound("Category not found.");
         }
-        if (!category.Project.ProjectUsers.Any(pu => pu.UserId == _userContext.UserId))
+        if (!category.Project.ProjectUsers.Select(x => x.UserId).Contains(_userContext.UserId))
         {
             return ServiceResult<bool>.Unauthorized($"You do not have permission to {operation} this category.");
         }

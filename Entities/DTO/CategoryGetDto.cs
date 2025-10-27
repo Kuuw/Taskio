@@ -14,8 +14,6 @@ public partial class CategoryGetDto
 
     public int SortOrder { get; set; }
 
-    public virtual ProjectGetDto Project { get; set; } = null!;
-
     public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 
 }

@@ -1,4 +1,4 @@
-﻿using Entities.DTO;
+using Entities.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Abstract;
@@ -13,26 +13,26 @@ public class TaskController : BaseController
     private readonly ITaskService _taskService;
 
     public TaskController(ITaskService taskService)
-    {
+ {
         _taskService = taskService;
     }
 
-    [HttpGet("/FromProjectId/{id}")]
+    [HttpGet("FromProjectId/{id}")]
     public IActionResult GetTasksFromProject(Guid id)
     {
-        return HandleServiceResult(_taskService.GetTasksFromProject(id));
+    return HandleServiceResult(_taskService.GetTasksFromProject(id));
     }
 
     [HttpGet("{id}")]
     public IActionResult GetTask(Guid id)
     {
-        return HandleServiceResult(_taskService.Get(id));
+  return HandleServiceResult(_taskService.Get(id));
     }
 
     [HttpPost]
-    public IActionResult PostTask(TaskPostDto task)
+ public IActionResult PostTask(TaskPostDto task)
     {
-        return HandleServiceResult(_taskService.Insert(task));
+ return HandleServiceResult(_taskService.Insert(task));
     }
 
     [HttpPut]
@@ -44,6 +44,6 @@ public class TaskController : BaseController
     [HttpDelete("{id}")]
     public IActionResult DeleteTask(Guid id)
     {
-        return HandleServiceResult(_taskService.Delete(id));
+    return HandleServiceResult(_taskService.Delete(id));
     }
 }

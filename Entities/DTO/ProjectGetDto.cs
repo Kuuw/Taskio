@@ -11,6 +11,4 @@ public partial class ProjectGetDto
     public DateTime UpdatedAt { get; set; }
 
     public virtual ICollection<CategoryGetDto> Categories { get; set; } = new List<CategoryGetDto>();
-
-    public virtual ICollection<TaskGetDto> Tasks { get; set; } = new List<TaskGetDto>();
 }
