@@ -93,11 +93,11 @@ entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
 
     entity.HasOne(d => d.Category).WithMany(p => p.Tasks)
          .HasForeignKey(d => d.CategoryId)
-         .OnDelete(DeleteBehavior.ClientSetNull)
+         .OnDelete(DeleteBehavior.NoAction)
          .HasConstraintName("FK_Task_Category");
 
     entity.HasOne(d => d.Project).WithMany(p => p.Tasks)
-              .HasForeignKey(d => d.ProjectId)
+          .HasForeignKey(d => d.ProjectId)
           .HasConstraintName("FK_Task_Project");
 
         entity.HasMany(d => d.Users).WithMany(p => p.Tasks)
