@@ -1,5 +1,6 @@
 using AutoMapper;
 using Data.Abstract;
+using Data.Concrete;
 using Entities.Context.Abstract;
 using Entities.DTO;
 using Entities.Models;
@@ -11,13 +12,15 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly ITaskRepository _taskRepository;
     private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
     protected readonly IUserContext _userContext;
 
-    public CategoryService(ICategoryRepository categoryRepository, IProjectRepository projectRepository, IUserContext userContext) : base(categoryRepository, userContext)
+    public CategoryService(ICategoryRepository categoryRepository, IProjectRepository projectRepository, ITaskRepository taskRepository, IUserContext userContext) : base(categoryRepository, userContext)
     {
         _categoryRepository = categoryRepository;
         _projectRepository = projectRepository;
+        _taskRepository = taskRepository;
         _userContext = userContext;
     }
 
@@ -41,6 +44,19 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         {
             return validationResult;
         }
+
+        var category = _categoryRepository.GetById(id);
+        if (category == null)
+        {
+            return ServiceResult<bool>.NotFound("Category not found");
+        }
+
+        var tasksToDelete = category.Tasks.ToList();
+        foreach (var task in tasksToDelete)
+        {
+            _taskRepository.Delete(task);
+        }
+
         return base.Delete(id);
     }
 
