@@ -184,11 +184,18 @@ public partial class BoardViewModel : ObservableObject
         ErrorMessage = string.Empty;
         try
         {
+            System.Diagnostics.Debug.WriteLine($"MoveTaskToCategoryAsync called: Task={taskItem.TaskName}, FromCategory={taskItem.CategoryId}, ToCategory={targetCategoryId}");
+            
             var oldCategory = CategoryColumns.FirstOrDefault(c => c.Category.CategoryId == taskItem.CategoryId);
             var taskData = new TaskPutDto { TaskId = taskItem.TaskId, ProjectId = taskItem.ProjectId, CategoryId = targetCategoryId, TaskName = taskItem.TaskName, TaskDesc = taskItem.TaskDesc, DueDate = taskItem.DueDate };
+            
+            System.Diagnostics.Debug.WriteLine($"Calling _taskService.UpdateAsync with CategoryId={targetCategoryId}");
             var updatedTask = await _taskService.UpdateAsync(taskData);
+            
             if (updatedTask != null)
             {
+                System.Diagnostics.Debug.WriteLine($"Task updated successfully on backend. New CategoryId={updatedTask.CategoryId}");
+                
                 if (oldCategory != null)
                 {
                     var taskToRemove = oldCategory.Tasks.FirstOrDefault(t => t.TaskId == taskItem.TaskId);
@@ -196,6 +203,7 @@ public partial class BoardViewModel : ObservableObject
                     {
                         oldCategory.Tasks.Remove(taskToRemove);
                         oldCategory.FilteredTasks.Remove(taskToRemove);
+                        System.Diagnostics.Debug.WriteLine($"Removed task from old category: {oldCategory.Category.CategoryName}");
                     }
                 }
                 var newCategory = CategoryColumns.FirstOrDefault(c => c.Category.CategoryId == targetCategoryId);
@@ -203,11 +211,19 @@ public partial class BoardViewModel : ObservableObject
                 {
                     newCategory.Tasks.Add(updatedTask);
                     newCategory.FilteredTasks.Add(updatedTask);
+                    System.Diagnostics.Debug.WriteLine($"Added task to new category: {newCategory.Category.CategoryName}");
                 }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("ERROR: _taskService.UpdateAsync returned null");
+                ErrorMessage = "Failed to update task - service returned null";
             }
         }
         catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"ERROR in MoveTaskToCategoryAsync: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             ErrorMessage = $"Failed to move task: {ex.Message}";
         }
         finally

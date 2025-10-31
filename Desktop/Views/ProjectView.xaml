@@ -58,6 +58,7 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="viewmodels:CategoryWithTasksViewModel">
                             <Border
+                                x:Name="CategoryBorder"
                                 Padding="15"
                                 MaximumHeightRequest="650"
                                 Stroke="{AppThemeBinding Light={StaticResource Gray200},
@@ -71,6 +72,12 @@
                                         ColumnDefinitions="*,Auto"
                                         ColumnSpacing="10"
                                         MaximumHeightRequest="25">
+                                        <Grid.GestureRecognizers>
+                                            <DropGestureRecognizer
+                                                AllowDrop="True"
+                                                DragOver="OnCategoryDragOver"
+                                                Drop="OnCategoryDrop" />
+                                        </Grid.GestureRecognizers>
                                         <Label
                                             FontAttributes="Bold"
                                             FontSize="18"
@@ -93,6 +100,12 @@
 
                                     <ScrollView Padding="10,0,10,0" MaximumHeightRequest="500">
                                         <VerticalStackLayout Spacing="8">
+                                            <VerticalStackLayout.GestureRecognizers>
+                                                <DropGestureRecognizer
+                                                    AllowDrop="True"
+                                                    DragOver="OnCategoryDragOver"
+                                                    Drop="OnCategoryDrop" />
+                                            </VerticalStackLayout.GestureRecognizers>
                                             <CollectionView ItemsSource="{Binding FilteredTasks}" SelectionMode="None">
                                                 <CollectionView.ItemsLayout>
                                                     <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
@@ -108,31 +121,42 @@
                                                                                      Dark={StaticResource Gray600}}"
                                                             StrokeShape="RoundRectangle 8"
                                                             StrokeThickness="1">
-                                                            <VerticalStackLayout Spacing="5">
+                                                            <Border.GestureRecognizers>
+                                                                <DragGestureRecognizer DragStarting="OnTaskDragStarting" />
+                                                            </Border.GestureRecognizers>
+                                                            <VerticalStackLayout InputTransparent="True" Spacing="5">
                                                                 <Label
                                                                     FontAttributes="Bold"
                                                                     FontSize="14"
+                                                                    InputTransparent="True"
                                                                     Text="{Binding TaskName}" />
                                                                 <Label
                                                                     FontSize="12"
+                                                                    InputTransparent="True"
                                                                     IsVisible="{Binding TaskDesc, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
                                                                     Text="{Binding TaskDesc}"
                                                                     TextColor="{AppThemeBinding Light={StaticResource Gray600},
                                                                                                 Dark={StaticResource Gray400}}" />
                                                                 <Label
                                                                     FontSize="11"
+                                                                    InputTransparent="True"
                                                                     IsVisible="{Binding UpdatedAt, Converter={StaticResource IsNotNullConverter}}"
                                                                     Text="{Binding UpdatedAt, StringFormat='Last Updated At: {0:dd MMMM yyyy}'}"
                                                                     TextColor="{AppThemeBinding Light={StaticResource Gray600},
                                                                                                 Dark={StaticResource Gray400}}" />
                                                                 <Label
                                                                     FontSize="11"
+                                                                    InputTransparent="True"
                                                                     IsVisible="{Binding DueDate, Converter={StaticResource IsNotNullConverter}}"
                                                                     Text="{Binding DueDate, StringFormat='Due: {0:MMM dd, yyyy}'}"
                                                                     TextColor="Orange" />
-                                                                <HorizontalStackLayout Margin="0,0,0,0" Spacing="5">
+                                                                <HorizontalStackLayout
+                                                                    Margin="0,0,0,0"
+                                                                    InputTransparent="True"
+                                                                    Spacing="5">
                                                                     <Label
                                                                         FontSize="11"
+                                                                        InputTransparent="True"
                                                                         Text="{Binding Users.Count, StringFormat='Users: {0}'}"
                                                                         TextColor="{AppThemeBinding Light={StaticResource Gray600},
                                                                                                     Dark={StaticResource Gray400}}" />
@@ -145,6 +169,7 @@
                                                     <Label
                                                         Margin="0,20,0,0"
                                                         FontSize="14"
+                                                        HeightRequest="95"
                                                         HorizontalOptions="Center"
                                                         Text="No tasks"
                                                         TextColor="{AppThemeBinding Light={StaticResource Gray600},
