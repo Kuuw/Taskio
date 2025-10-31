@@ -21,17 +21,12 @@ public class UserService : GenericService<User, UserRegister, UserGetDto, UserPu
         _userContext = userContext;
     }
 
-    public ServiceResult<bool> Register(UserRegister userRegister)
+    public ServiceResult<UserGetDto?> Register(UserRegister userRegister)
     {
         var existingUsers = _userRepository.Where(new List<Func<User, bool>> { x => x.Email == userRegister.Email });
         if (existingUsers != null && existingUsers.Any())
         {
-            return new ServiceResult<bool>
-            {
-                Success = false,
-                ErrorMessage = "User with this email already exists.",
-                Data = false
-            };
+            return ServiceResult<UserGetDto?>.BadRequest("User with this email already exists.");
         }
         var user = new User
         {
@@ -42,11 +37,9 @@ public class UserService : GenericService<User, UserRegister, UserGetDto, UserPu
         };
 
         _userRepository.Insert(user);
-        return new ServiceResult<bool>
-        {
-            Success = true,
-            Data = true
-        };
+
+        var newUser = _userRepository.GetByEmail(userRegister.Email);
+        return ServiceResult<UserGetDto?>.Ok(_mapper.Map<UserGetDto>(newUser));
     }
 
     public ServiceResult<UserGetDto> Get()
