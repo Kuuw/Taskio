@@ -44,7 +44,12 @@
                 IsVisible="{Binding IsLoading}" />
         </VerticalStackLayout>
 
-        <ScrollView Grid.Row="1" Orientation="Horizontal">
+        <ScrollView
+            Grid.Row="1"
+            Padding="5"
+            MaximumHeightRequest="700"
+            Orientation="Horizontal"
+            VerticalOptions="Start">
             <HorizontalStackLayout Spacing="15">
                 <CollectionView ItemsSource="{Binding CategoryColumns}" SelectionMode="None">
                     <CollectionView.ItemsLayout>
@@ -86,7 +91,7 @@
 
                                     <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}" />
 
-                                    <ScrollView MaximumHeightRequest="500">
+                                    <ScrollView Padding="10,0,10,0" MaximumHeightRequest="500">
                                         <VerticalStackLayout Spacing="8">
                                             <CollectionView ItemsSource="{Binding FilteredTasks}" SelectionMode="None">
                                                 <CollectionView.ItemsLayout>
