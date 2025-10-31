@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Desktop.Views.ProjectListView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dto="clr-namespace:Entities.DTO;assembly=Entities"
+    xmlns:viewmodels="clr-namespace:Desktop.ViewModels"
+    Title="Projects"
+    x:DataType="viewmodels:ProjectListViewModel">
+    <Grid Padding="20" RowDefinitions="Auto,*">
+        <VerticalStackLayout
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            Spacing="15">
+            <Label
+                FontAttributes="Bold"
+                FontSize="32"
+                Text="My Projects" />
+
+            <HorizontalStackLayout Spacing="10">
+                <Border
+                    Padding="15,10"
+                    HorizontalOptions="Fill"
+                    Stroke="{AppThemeBinding Light={StaticResource Gray200},
+                                             Dark={StaticResource Gray600}}"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="1">
+                    <Entry
+                        HorizontalOptions="Fill"
+                        Placeholder="New project name"
+                        ReturnType="Done"
+                        Text="{Binding NewProjectName}" />
+                </Border>
+                <Button
+                    Command="{Binding CreateProjectCommand}"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    Text="Create Project"
+                    WidthRequest="150" />
+            </HorizontalStackLayout>
+
+            <Label
+                IsVisible="{Binding ErrorMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                Text="{Binding ErrorMessage}"
+                TextColor="Red" />
+
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <CollectionView ItemsSource="{Binding Projects}" SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="dto:ProjectGetDto">
+                        <Border
+                            Margin="0"
+                            Padding="20"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                                              Dark={StaticResource Gray900}}"
+                            Stroke="{AppThemeBinding Light={StaticResource Gray200},
+                                                     Dark={StaticResource Gray600}}"
+                            StrokeShape="RoundRectangle 10"
+                            StrokeThickness="1">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectProjectCommand}" CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                                <VerticalStackLayout Grid.Column="0" Spacing="5">
+                                    <Label
+                                        FontAttributes="Bold"
+                                        FontSize="20"
+                                        Text="{Binding ProjectName}" />
+                                    <Label
+                                        FontSize="12"
+                                        Text="{Binding UpdatedAt, StringFormat='Last Updated: {0}'}"
+                                        TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                    Dark={StaticResource Gray400}}" />
+                                    <Label
+                                        FontSize="12"
+                                        Text="{Binding Categories.Count, StringFormat='{}{0} categories'}"
+                                        TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                    Dark={StaticResource Gray400}}" />
+                                </VerticalStackLayout>
+
+                                <Button
+                                    Grid.Column="1"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectProjectCommand}"
+                                    CommandParameter="{Binding .}"
+                                    HeightRequest="40"
+                                    Text="Open"
+                                    WidthRequest="80" />
+
+                                <Button
+                                    Grid.Column="2"
+                                    BackgroundColor="PaleVioletRed"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteProjectCommand}"
+                                    CommandParameter="{Binding .}"
+                                    HeightRequest="40"
+                                    Text="Delete"
+                                    WidthRequest="80" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout
+                        HorizontalOptions="Center"
+                        Spacing="10"
+                        VerticalOptions="Center">
+                        <Label
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            Text="No projects yet"
+                            TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                        Dark={StaticResource Gray400}}" />
+                        <Label
+                            FontSize="14"
+                            HorizontalOptions="Center"
+                            Text="Create your first project to get started"
+                            TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                        Dark={StaticResource Gray400}}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </ScrollView>
+    </Grid>
+</ContentPage>

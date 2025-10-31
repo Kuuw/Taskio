@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Desktop.Views.ProjectView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dto="clr-namespace:Entities.DTO;assembly=Entities"
+    xmlns:viewmodels="clr-namespace:Desktop.ViewModels"
+    Title="{Binding Project.ProjectName}"
+    x:DataType="viewmodels:BoardViewModel">
+    <Grid Padding="20" RowDefinitions="Auto,*">
+        <VerticalStackLayout
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            Spacing="15">
+            <HorizontalStackLayout Spacing="15">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="32"
+                    HorizontalOptions="Start"
+                    Text="{Binding Project.ProjectName}" />
+                <Button
+                    Command="{Binding RefreshBoardCommand}"
+                    Text="Refresh"
+                    WidthRequest="100" />
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="10">
+                <Border
+                    Padding="15,10"
+                    HorizontalOptions="FillAndExpand"
+                    Stroke="{AppThemeBinding Light={StaticResource Gray200},
+                                             Dark={StaticResource Gray600}}"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="1">
+                    <Entry
+                        HorizontalOptions="FillAndExpand"
+                        Placeholder="Search tasks..."
+                        Text="{Binding SearchText}" />
+                </Border>
+            </HorizontalStackLayout>
+
+            <Label
+                IsVisible="{Binding ErrorMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                Text="{Binding ErrorMessage}"
+                TextColor="Red" />
+
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1" Orientation="Horizontal">
+            <HorizontalStackLayout Spacing="15">
+                <CollectionView ItemsSource="{Binding CategoryColumns}" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="10" Orientation="Horizontal" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:CategoryWithTasksViewModel">
+                            <Border
+                                Padding="15"
+                                Stroke="{AppThemeBinding Light={StaticResource Gray200},
+                                                         Dark={StaticResource Gray600}}"
+                                StrokeShape="RoundRectangle 10"
+                                StrokeThickness="1"
+                                WidthRequest="300">
+                                <VerticalStackLayout Spacing="10">
+                                    <Grid
+                                        ColumnDefinitions="*,Auto"
+                                        ColumnSpacing="10"
+                                        MaximumHeightRequest="25">
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="18"
+                                            Text="{Binding Category.CategoryName}"
+                                            VerticalOptions="Center" />
+                                        <Button
+                                            Grid.Column="1"
+                                            BackgroundColor="Transparent"
+                                            BorderWidth="0"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:BoardViewModel}}, Path=DeleteCategoryCommand}"
+                                            CommandParameter="{Binding .}"
+                                            FontSize="13"
+                                            HeightRequest="15"
+                                            Text="Delete"
+                                            TextColor="Red"
+                                            WidthRequest="81" />
+                                    </Grid>
+
+                                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}" />
+
+                                    <ScrollView MaximumHeightRequest="500">
+                                        <VerticalStackLayout Spacing="8">
+                                            <CollectionView ItemsSource="{Binding FilteredTasks}" SelectionMode="None">
+                                                <CollectionView.ItemsLayout>
+                                                    <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
+                                                </CollectionView.ItemsLayout>
+                                                <CollectionView.ItemTemplate>
+                                                    <DataTemplate x:DataType="dto:TaskGetDto">
+                                                        <Border
+                                                            Margin="0,0,0,0"
+                                                            Padding="12"
+                                                            BackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                                                                              Dark={StaticResource Gray900}}"
+                                                            Stroke="{AppThemeBinding Light={StaticResource Gray200},
+                                                                                     Dark={StaticResource Gray600}}"
+                                                            StrokeShape="RoundRectangle 8"
+                                                            StrokeThickness="1">
+                                                            <VerticalStackLayout Spacing="5">
+                                                                <Label
+                                                                    FontAttributes="Bold"
+                                                                    FontSize="14"
+                                                                    Text="{Binding TaskName}" />
+                                                                <Label
+                                                                    FontSize="12"
+                                                                    IsVisible="{Binding TaskDesc, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                                                                    Text="{Binding TaskDesc}"
+                                                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                                                Dark={StaticResource Gray400}}" />
+                                                                <Label
+                                                                    FontSize="11"
+                                                                    IsVisible="{Binding UpdatedAt, Converter={StaticResource IsNotNullConverter}}"
+                                                                    Text="{Binding UpdatedAt, StringFormat='Last Updated At: {0:dd MMMM yyyy}'}"
+                                                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                                                Dark={StaticResource Gray400}}" />
+                                                                <Label
+                                                                    FontSize="11"
+                                                                    IsVisible="{Binding DueDate, Converter={StaticResource IsNotNullConverter}}"
+                                                                    Text="{Binding DueDate, StringFormat='Due: {0:MMM dd, yyyy}'}"
+                                                                    TextColor="Orange" />
+                                                                <HorizontalStackLayout Margin="0,0,0,0" Spacing="5">
+                                                                    <Label
+                                                                        FontSize="11"
+                                                                        Text="{Binding Users.Count, StringFormat='Users: {0}'}"
+                                                                        TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                                                    Dark={StaticResource Gray400}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </CollectionView.ItemTemplate>
+                                                <CollectionView.EmptyView>
+                                                    <Label
+                                                        Margin="0,20,0,0"
+                                                        FontSize="14"
+                                                        HorizontalOptions="Center"
+                                                        Text="No tasks"
+                                                        TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                                    Dark={StaticResource Gray400}}" />
+                                                </CollectionView.EmptyView>
+                                            </CollectionView>
+                                        </VerticalStackLayout>
+                                    </ScrollView>
+
+                                    <Border
+                                        Padding="10"
+                                        IsVisible="{Binding IsAddingTask, Converter={StaticResource InvertedBoolConverter}}"
+                                        Stroke="{AppThemeBinding Light={StaticResource Gray300},
+                                                                 Dark={StaticResource Gray600}}"
+                                        StrokeShape="RoundRectangle 8"
+                                        StrokeThickness="1">
+                                        <HorizontalStackLayout Spacing="5">
+                                            <Label
+                                                FontSize="16"
+                                                Text="+"
+                                                VerticalOptions="Center" />
+                                            <Label
+                                                FontSize="14"
+                                                Text="Add task"
+                                                VerticalOptions="Center">
+                                                <Label.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding StartAddingTaskCommand}" />
+                                                </Label.GestureRecognizers>
+                                            </Label>
+                                        </HorizontalStackLayout>
+                                    </Border>
+
+                                    <Border
+                                        Padding="10"
+                                        IsVisible="{Binding IsAddingTask}"
+                                        Stroke="{AppThemeBinding Light={StaticResource Gray300},
+                                                                 Dark={StaticResource Gray600}}"
+                                        StrokeShape="RoundRectangle 8"
+                                        StrokeThickness="1">
+                                        <VerticalStackLayout Spacing="8">
+                                            <Entry
+                                                Placeholder="Task name"
+                                                ReturnType="Done"
+                                                Text="{Binding NewTaskName}" />
+                                            <HorizontalStackLayout Spacing="5">
+                                                <Button
+                                                    Command="{Binding AddTaskCommand}"
+                                                    HeightRequest="35"
+                                                    Text="Add"
+                                                    WidthRequest="80" />
+                                                <Button
+                                                    BackgroundColor="Transparent"
+                                                    Command="{Binding CancelAddingTaskCommand}"
+                                                    HeightRequest="35"
+                                                    Text="Cancel"
+                                                    TextColor="{StaticResource Primary}"
+                                                    WidthRequest="80" />
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Border
+                    Padding="15"
+                    Stroke="{AppThemeBinding Light={StaticResource Gray200},
+                                             Dark={StaticResource Gray600}}"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="1"
+                    WidthRequest="300">
+                    <VerticalStackLayout Spacing="10" VerticalOptions="Start">
+                        <HorizontalStackLayout Spacing="10">
+                            <Label
+                                FontSize="16"
+                                Text="+ Add Category"
+                                TextColor="{StaticResource Primary}"
+                                VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnAddCategoryTapped" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+
+                        <Border
+                            x:Name="AddCategoryBorder"
+                            Padding="10"
+                            IsVisible="False"
+                            Stroke="{AppThemeBinding Light={StaticResource Gray300},
+                                                     Dark={StaticResource Gray600}}"
+                            StrokeShape="RoundRectangle 8"
+                            StrokeThickness="1">
+                            <VerticalStackLayout Spacing="8">
+                                <Entry
+                                    x:Name="NewCategoryEntry"
+                                    Placeholder="Category name"
+                                    ReturnType="Done" />
+                                <HorizontalStackLayout Spacing="5">
+                                    <Button
+                                        Clicked="OnAddCategoryClicked"
+                                        HeightRequest="35"
+                                        Text="Add"
+                                        WidthRequest="80" />
+                                    <Button
+                                        BackgroundColor="Transparent"
+                                        Clicked="OnCancelAddCategoryClicked"
+                                        HeightRequest="35"
+                                        Text="Cancel"
+                                        TextColor="{StaticResource Primary}"
+                                        WidthRequest="80" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+            </HorizontalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
