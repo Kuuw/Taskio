@@ -9,7 +9,7 @@ public interface IProjectService : IGenericService<Project, ProjectPostDto, Proj
     public ServiceResult<bool> AddUserToProject(Guid projectId, Guid userId);
     public ServiceResult<bool> RemoveUserFromProject(Guid projectId, Guid userId);
     public ServiceResult<bool> SetUserAsAdmin(Guid projectId, Guid userId, bool isAdmin);
-    public ServiceResult<bool> Create(ProjectPostDto data);
+    public ServiceResult<ProjectGetDto> Create(ProjectPostDto data);
     public new ServiceResult<bool> Update(ProjectPutDto data);
     public new ServiceResult<bool> Delete(Guid id);
 }

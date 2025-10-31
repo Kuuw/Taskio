@@ -84,7 +84,7 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
         return ServiceResult<bool>.Ok(result);
     }
 
-    public ServiceResult<bool> Create(ProjectPostDto projectDto)
+    public ServiceResult<ProjectGetDto> Create(ProjectPostDto projectDto)
     {
         var project = _mapper.Map<Project>(projectDto);
         project.ProjectUsers = new List<ProjectUser>
@@ -96,7 +96,21 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
             }
         };
         var result = _projectRepository.Insert(project);
-        return ServiceResult<bool>.Ok(result);
+        
+     if (result)
+        {
+       // Fetch the created project to return full DTO
+            var projects = _projectRepository.getFromUserId(_userContext.UserId);
+            var createdProject = projects.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
+            
+            if (createdProject != null)
+          {
+                var createdProjectDto = _mapper.Map<ProjectGetDto>(createdProject);
+                return ServiceResult<ProjectGetDto>.Ok(createdProjectDto);
+          }
+        }
+        
+        return ServiceResult<ProjectGetDto>.InternalServerError("Failed to create project.");
     }
 
     public new ServiceResult<bool> Update(ProjectPutDto projectDto)

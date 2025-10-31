@@ -7,7 +7,7 @@ public interface ITaskService : IGenericService<Entities.Models.Task, TaskPostDt
 {
     public ServiceResult<TaskGetDto> Get(Guid guid);
     public ServiceResult<List<TaskGetDto>> GetTasksFromProject(Guid guid);
-    public new ServiceResult<bool> Insert(TaskPostDto taskPostDto);
-    public new ServiceResult<bool> Update(TaskPutDto taskPutDto);
+    public new ServiceResult<TaskGetDto> Insert(TaskPostDto taskPostDto);
+    public new ServiceResult<TaskGetDto> Update(TaskPutDto taskPutDto);
     public new ServiceResult<bool> Delete(Guid id);
 }
