@@ -26,18 +26,11 @@
             </HorizontalStackLayout>
 
             <HorizontalStackLayout Spacing="10">
-                <Border
-                    Padding="15,10"
-                    HorizontalOptions="FillAndExpand"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray200},
-                                             Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="1">
-                    <Entry
-                        HorizontalOptions="FillAndExpand"
-                        Placeholder="Search tasks..."
-                        Text="{Binding SearchText}" />
-                </Border>
+                <Entry
+                    HorizontalOptions="Fill"
+                    Placeholder="Search tasks..."
+                    Text="{Binding SearchText}"
+                    WidthRequest="250" />
             </HorizontalStackLayout>
 
             <Label
@@ -61,10 +54,12 @@
                         <DataTemplate x:DataType="viewmodels:CategoryWithTasksViewModel">
                             <Border
                                 Padding="15"
+                                MaximumHeightRequest="650"
                                 Stroke="{AppThemeBinding Light={StaticResource Gray200},
                                                          Dark={StaticResource Gray600}}"
                                 StrokeShape="RoundRectangle 10"
                                 StrokeThickness="1"
+                                VerticalOptions="Start"
                                 WidthRequest="300">
                                 <VerticalStackLayout Spacing="10">
                                     <Grid
@@ -213,17 +208,19 @@
 
                 <Border
                     Padding="15"
+                    MaximumHeightRequest="350"
                     Stroke="{AppThemeBinding Light={StaticResource Gray200},
                                              Dark={StaticResource Gray600}}"
                     StrokeShape="RoundRectangle 10"
                     StrokeThickness="1"
-                    WidthRequest="300">
-                    <VerticalStackLayout Spacing="10" VerticalOptions="Start">
+                    WidthRequest="150">
+                    <VerticalStackLayout Spacing="10" VerticalOptions="Center">
                         <HorizontalStackLayout Spacing="10">
                             <Label
                                 FontSize="16"
                                 Text="+ Add Category"
-                                TextColor="{StaticResource Primary}"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary},
+                                                            Dark={StaticResource PrimaryDark}}"
                                 VerticalOptions="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnAddCategoryTapped" />

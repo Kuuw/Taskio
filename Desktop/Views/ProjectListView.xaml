@@ -29,24 +29,17 @@
             </Grid>
 
             <HorizontalStackLayout Spacing="10">
-                <Border
-                    Padding="15,10"
+                <Entry
                     HorizontalOptions="Fill"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray200},
-                                             Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="1">
-                    <Entry
-                        HorizontalOptions="Fill"
-                        Placeholder="New project name"
-                        ReturnType="Done"
-                        Text="{Binding NewProjectName}" />
-                </Border>
+                    Placeholder="New Project Name"
+                    ReturnType="Done"
+                    Text="{Binding NewProjectName}"
+                    WidthRequest="180" />
                 <Button
                     Command="{Binding CreateProjectCommand}"
                     IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
                     Text="Create Project"
-                    WidthRequest="150" />
+                    WidthRequest="120" />
             </HorizontalStackLayout>
 
             <Label

@@ -25,55 +25,31 @@
                 HorizontalOptions="Center"
                 Text="Create your account" />
 
-            <Border
-                Padding="15,10"
-                Stroke="{AppThemeBinding Light={StaticResource Gray200},
-                                         Dark={StaticResource Gray600}}"
-                StrokeShape="RoundRectangle 10"
-                StrokeThickness="1">
-                <Entry
-                    Placeholder="First Name"
-                    ReturnType="Next"
-                    Text="{Binding FirstName}" />
-            </Border>
+            <Entry
+                Placeholder="First Name"
+                ReturnType="Next"
+                Text="{Binding FirstName}"
+                WidthRequest="300" />
 
-            <Border
-                Padding="15,10"
-                Stroke="{AppThemeBinding Light={StaticResource Gray200},
-                                         Dark={StaticResource Gray600}}"
-                StrokeShape="RoundRectangle 10"
-                StrokeThickness="1">
-                <Entry
-                    Placeholder="Last Name"
-                    ReturnType="Next"
-                    Text="{Binding LastName}" />
-            </Border>
+            <Entry
+                Placeholder="Last Name"
+                ReturnType="Next"
+                Text="{Binding LastName}"
+                WidthRequest="300" />
 
-            <Border
-                Padding="15,10"
-                Stroke="{AppThemeBinding Light={StaticResource Gray200},
-                                         Dark={StaticResource Gray600}}"
-                StrokeShape="RoundRectangle 10"
-                StrokeThickness="1">
-                <Entry
-                    Keyboard="Email"
-                    Placeholder="Email"
-                    ReturnType="Next"
-                    Text="{Binding Email}" />
-            </Border>
+            <Entry
+                Keyboard="Email"
+                Placeholder="Email"
+                ReturnType="Next"
+                Text="{Binding Email}"
+                WidthRequest="300" />
 
-            <Border
-                Padding="15,10"
-                Stroke="{AppThemeBinding Light={StaticResource Gray200},
-                                         Dark={StaticResource Gray600}}"
-                StrokeShape="RoundRectangle 10"
-                StrokeThickness="1">
-                <Entry
-                    IsPassword="True"
-                    Placeholder="Password"
-                    ReturnType="Done"
-                    Text="{Binding Password}" />
-            </Border>
+            <Entry
+                IsPassword="True"
+                Placeholder="Password"
+                ReturnType="Done"
+                Text="{Binding Password}"
+                WidthRequest="300" />
 
             <Label
                 HorizontalOptions="Center"
@@ -87,7 +63,8 @@
                 FontSize="18"
                 HeightRequest="50"
                 IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
-                Text="Register" />
+                Text="Register"
+                WidthRequest="350" />
 
             <ActivityIndicator
                 HorizontalOptions="Center"
