@@ -1,8 +1,8 @@
 using API.Controllers;
-using Services.Abstract;
 using Entities.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Services.Abstract;
 
 namespace PL.Controllers;
 
@@ -15,7 +15,7 @@ public class CategoryController : BaseController
 
     public CategoryController(ICategoryService categoryService)
     {
-   _categoryService = categoryService;
+        _categoryService = categoryService;
     }
 
     [HttpGet("{id}")]
@@ -38,7 +38,7 @@ public class CategoryController : BaseController
     }
 
     [HttpPut]
- public IActionResult CategoryPut([FromBody] CategoryPutDto data)
+    public IActionResult CategoryPut([FromBody] CategoryPutDto data)
     {
         return HandleServiceResult(_categoryService.Update(data));
     }
@@ -46,6 +46,6 @@ public class CategoryController : BaseController
     [HttpDelete("{id}")]
     public IActionResult CategoryDelete(Guid id)
     {
-return HandleServiceResult(_categoryService.Delete(id));
+        return HandleServiceResult(_categoryService.Delete(id));
     }
 }
