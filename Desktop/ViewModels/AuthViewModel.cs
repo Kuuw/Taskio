@@ -60,7 +60,6 @@ public partial class AuthViewModel : ObservableObject
                     FirstName = response.FirstName,
                     LastName = response.LastName,
                     Email = Email,
-                    Password = string.Empty,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -108,15 +107,13 @@ public partial class AuthViewModel : ObservableObject
                     FirstName = response.FirstName,
                     LastName = response.LastName,
                     Email = Email,
-                    Password = string.Empty,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
                 IsAuthenticated = true;
                 ErrorMessage = string.Empty;
 
-                // Navigate to ProjectListView after successful registration
-                await Shell.Current.GoToAsync("//ProjectListView");
+                await Shell.Current.GoToAsync("//LoginView");
             }
             else
             {
