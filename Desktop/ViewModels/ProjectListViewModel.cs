@@ -26,9 +26,12 @@ public partial class ProjectListViewModel : ObservableObject
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
-    public ProjectListViewModel(IProjectService projectService)
+    public AuthViewModel AuthViewModel { get; }
+
+    public ProjectListViewModel(IProjectService projectService, AuthViewModel authViewModel)
     {
         _projectService = projectService;
+        AuthViewModel = authViewModel;
     }
 
     [RelayCommand]
@@ -120,9 +123,9 @@ public partial class ProjectListViewModel : ObservableObject
     private async System.Threading.Tasks.Task SelectProjectAsync(ProjectGetDto? project)
     {
         if (project == null) return;
-        
+
         SelectedProject = project;
-        
+
         await Shell.Current.GoToAsync(nameof(ProjectView), new Dictionary<string, object>
         {
             { "Project", project }

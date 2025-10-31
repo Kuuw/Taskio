@@ -97,7 +97,7 @@ public partial class UserViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task UpdateUserAsync(UserGetDto user)
+    private async Task UpdateUserAsync(UserPutDto user)
     {
         if (user == null)
         {
@@ -112,17 +112,20 @@ public partial class UserViewModel : ObservableObject
             var updatedUser = await _userService.UpdateAsync(userData);
             if (updatedUser != null)
             {
-                var index = Users.IndexOf(user);
-                if (index >= 0)
+                // Find the UserGetDto in Users that matches the updated user's ID
+                var existingUser = Users.FirstOrDefault(u => u.UserId == updatedUser.UserId);
+                if (existingUser != null)
                 {
+                    var index = Users.IndexOf(existingUser);
                     Users[index] = updatedUser;
                 }
-                var filteredIndex = FilteredUsers.IndexOf(user);
-                if (filteredIndex >= 0)
+                var filteredExistingUser = FilteredUsers.FirstOrDefault(u => u.UserId == updatedUser.UserId);
+                if (filteredExistingUser != null)
                 {
+                    var filteredIndex = FilteredUsers.IndexOf(filteredExistingUser);
                     FilteredUsers[filteredIndex] = updatedUser;
                 }
-                if (CurrentUser?.UserId == user.UserId)
+                if (CurrentUser?.UserId == updatedUser.UserId)
                 {
                     CurrentUser = updatedUser;
                 }
