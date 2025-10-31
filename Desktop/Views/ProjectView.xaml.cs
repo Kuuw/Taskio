@@ -54,4 +54,28 @@ public partial class ProjectView : ContentPage, IQueryAttributable
         NewCategoryEntry.Text = string.Empty;
         AddCategoryBorder.IsVisible = false;
     }
+
+    private async void OnDeleteCategoryClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.CommandParameter is CategoryWithTasksViewModel categoryViewModel)
+        {
+            var categoryName = categoryViewModel.Category?.CategoryName ?? "this category";
+            var taskCount = categoryViewModel.Tasks?.Count ?? 0;
+
+            var message = taskCount > 0
+        ? $"Are you sure you want to delete '{categoryName}'? This will also delete {taskCount} task(s)."
+   : $"Are you sure you want to delete '{categoryName}'?";
+
+            bool answer = await DisplayAlert(
+               "Delete Category",
+                       message,
+                  "Delete",
+                 "Cancel");
+
+            if (answer && _viewModel != null)
+            {
+                await _viewModel.DeleteCategoryCommand.ExecuteAsync(categoryViewModel);
+            }
+        }
+    }
 }
