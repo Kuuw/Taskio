@@ -68,6 +68,25 @@ namespace Data.Concrete
         {
             using (var dbContextTransaction = _context.Database.BeginTransaction())
             {
+                var keyValues = _context.Entry(p).Properties
+                    .Where(prop => prop.Metadata.IsPrimaryKey())
+                    .Select(prop => prop.CurrentValue)
+                    .ToArray();
+
+                var existingEntity = keyValues.Length > 0 ? data.Find(keyValues) : null;
+                
+                if (existingEntity != null)
+                {
+                    _context.Entry(existingEntity).State = EntityState.Detached;
+                }
+
+                var entry = _context.Entry(p);
+                if (entry.State == EntityState.Detached)
+                {
+                    data.Attach(p);
+                }
+                entry.State = EntityState.Modified;
+                
                 _context.SaveChanges();
                 dbContextTransaction.Commit();
                 return true;
