@@ -9,7 +9,7 @@ namespace Data.Concrete
         private readonly TaskioContext _context;
         private readonly DbSet<User> _user;
 
-        public UserRepository(TaskioContext context)
+        public UserRepository(TaskioContext context): base(context)
         {
             _context = context;
             _user = _context.Set<User>();

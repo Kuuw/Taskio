@@ -5,11 +5,12 @@ namespace Data.Concrete
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class, new()
     {
-        private readonly TaskioContext _context = new TaskioContext();
+        protected readonly TaskioContext _context;
         private readonly DbSet<T> data;
 
-        public GenericRepository()
+        public GenericRepository(TaskioContext context)
         {
+            _context = context;
             data = _context.Set<T>();
         }
 

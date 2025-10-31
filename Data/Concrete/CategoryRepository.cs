@@ -1,9 +1,11 @@
-﻿using Data.Abstract;
+﻿using Data;
+using Data.Abstract;
+using Data.Concrete;
 using Entities.Models;
 
-namespace Data.Concrete
+public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
 {
-    public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
+    public CategoryRepository(TaskioContext context) : base(context)
     {
     }
 }

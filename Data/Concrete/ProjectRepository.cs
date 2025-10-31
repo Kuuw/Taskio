@@ -9,7 +9,7 @@ namespace Data.Concrete
         private readonly TaskioContext _context;
         private readonly DbSet<Project> _project;
 
-        public ProjectRepository(TaskioContext context)
+        public ProjectRepository(TaskioContext context): base(context)
         {
             _context = context;
             _project = _context.Set<Project>();
