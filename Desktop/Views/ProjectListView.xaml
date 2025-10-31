@@ -6,7 +6,8 @@
     xmlns:dto="clr-namespace:Entities.DTO;assembly=Entities"
     xmlns:viewmodels="clr-namespace:Desktop.ViewModels"
     Title="Projects"
-    x:DataType="viewmodels:ProjectListViewModel">
+    x:DataType="viewmodels:ProjectListViewModel"
+    Shell.NavBarIsVisible="False">
     <Grid Padding="20" RowDefinitions="Auto,*">
         <VerticalStackLayout
             Grid.Row="0"

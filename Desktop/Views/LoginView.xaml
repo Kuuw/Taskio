@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:Desktop.ViewModels"
     Title="Login"
-    x:DataType="viewmodels:AuthViewModel">
+    x:DataType="viewmodels:AuthViewModel"
+    Shell.NavBarIsVisible="False">
     <ScrollView>
         <VerticalStackLayout
             Padding="30"
