@@ -3,6 +3,7 @@
     x:Class="Desktop.Views.ProjectView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Desktop.Controls"
     xmlns:dto="clr-namespace:Entities.DTO;assembly=Entities"
     xmlns:viewmodels="clr-namespace:Desktop.ViewModels"
     Title="{Binding Project.ProjectName}"
@@ -203,14 +204,22 @@
                                                     </DataTemplate>
                                                 </CollectionView.ItemTemplate>
                                                 <CollectionView.EmptyView>
-                                                    <Label
-                                                        Margin="0,20,0,0"
-                                                        FontSize="14"
-                                                        HeightRequest="95"
-                                                        HorizontalOptions="Center"
-                                                        Text="No tasks"
-                                                        TextColor="{AppThemeBinding Light={StaticResource Gray600},
-                                                                                    Dark={StaticResource Gray400}}" />
+                                                    <Border
+                                                        Stroke="{AppThemeBinding Light={StaticResource Gray400},
+                                                                                 Dark={StaticResource Gray500}}"
+                                                        StrokeDashArray="4,2"
+                                                        StrokeDashOffset="0"
+                                                        StrokeShape="RoundRectangle 8"
+                                                        StrokeThickness="1">
+                                                        <Label
+                                                            Margin="0,20,0,0"
+                                                            FontSize="14"
+                                                            HeightRequest="95"
+                                                            HorizontalOptions="Center"
+                                                            Text="No tasks"
+                                                            TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                                        Dark={StaticResource Gray400}}" />
+                                                    </Border>
                                                 </CollectionView.EmptyView>
                                             </CollectionView>
                                         </VerticalStackLayout>
@@ -278,6 +287,8 @@
                     MaximumHeightRequest="350"
                     Stroke="{AppThemeBinding Light={StaticResource Gray200},
                                              Dark={StaticResource Gray600}}"
+                    StrokeDashArray="4,3"
+                    StrokeDashOffset="0"
                     StrokeShape="RoundRectangle 10"
                     StrokeThickness="1"
                     WidthRequest="150">
