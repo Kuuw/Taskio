@@ -114,6 +114,72 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         return ServiceResult<bool>.Ok(result);
     }
 
+    public ServiceResult<bool> AddUserToTask(Guid taskId, string email)
+    {
+        var task = _taskRepository.GetById(taskId);
+        if (task == null)
+        {
+            return ServiceResult<bool>.NotFound("Task not found.");
+        }
+
+        var access = ValidateProjectAccess(task.ProjectId, "assign users in");
+        if (access != null)
+        {
+            return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
+        }
+
+        var user = _taskRepository.Queryable()
+            .SelectMany(t => t.Users)
+            .FirstOrDefault(u => u.Email == email);
+
+        if (user == null)
+        {
+            return ServiceResult<bool>.NotFound("User not found.");
+        }
+
+        var project = _projectRepository.GetById(task.ProjectId);
+        if (!project!.ProjectUsers.Any(pu => pu.UserId == user.UserId))
+        {
+            return ServiceResult<bool>.BadRequest("User is not a member of the project.");
+        }
+
+        if (task.Users.Any(u => u.UserId == user.UserId))
+        {
+            return ServiceResult<bool>.Conflict("User is already assigned to this task.");
+        }
+
+        task.Users.Add(user);
+        var result = _taskRepository.Update(task);
+
+        return ServiceResult<bool>.Ok(result);
+    }
+
+    public ServiceResult<bool> RemoveUserFromTask(Guid taskId, string email)
+    {
+        var task = _taskRepository.GetById(taskId);
+        if (task == null)
+        {
+            return ServiceResult<bool>.NotFound("Task not found.");
+        }
+
+        var access = ValidateProjectAccess(task.ProjectId, "remove users from");
+        if (access != null)
+        {
+            return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
+        }
+
+        var user = task.Users.FirstOrDefault(u => u.Email == email);
+        if (user == null)
+        {
+            return ServiceResult<bool>.NotFound("User is not assigned to this task.");
+        }
+
+        task.Users.Remove(user);
+        var result = _taskRepository.Update(task);
+
+        return ServiceResult<bool>.Ok(result);
+    }
+
     private ServiceResult<bool>? ValidateProjectAccess(Guid projectId, string operation)
     {
         var project = _projectRepository.GetById(projectId);

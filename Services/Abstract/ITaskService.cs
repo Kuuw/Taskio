@@ -10,4 +10,6 @@ public interface ITaskService : IGenericService<Entities.Models.Task, TaskPostDt
     public new ServiceResult<TaskGetDto> Insert(TaskPostDto taskPostDto);
     public new ServiceResult<TaskGetDto> Update(TaskPutDto taskPutDto);
     public new ServiceResult<bool> Delete(Guid id);
+    public ServiceResult<bool> AddUserToTask(Guid taskId, string email);
+    public ServiceResult<bool> RemoveUserFromTask(Guid taskId, string email);
 }
