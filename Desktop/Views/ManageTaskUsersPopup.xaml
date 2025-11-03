@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Desktop.Views.ManageTaskUsersPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dto="clr-namespace:Entities.DTO;assembly=Entities"
+    xmlns:viewmodels="clr-namespace:Desktop.ViewModels"
+    Title="Manage Task Users"
+    x:DataType="viewmodels:ManageTaskUsersViewModel">
+
+    <Grid Padding="20" RowDefinitions="Auto,Auto,*,Auto">
+        <Label
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            FontAttributes="Bold"
+            FontSize="24"
+            Text="{Binding TaskName, StringFormat='Manage Users - {0}'}" />
+
+        <VerticalStackLayout
+            Grid.Row="1"
+            Margin="0,0,0,20"
+            Spacing="10">
+            <Label
+                FontAttributes="Bold"
+                FontSize="16"
+                Text="Assign User to Task" />
+
+            <Label
+                FontSize="12"
+                Text="Select from project members"
+                TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                            Dark={StaticResource Gray400}}" />
+
+            <Label
+                IsVisible="{Binding ErrorMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                Text="{Binding ErrorMessage}"
+                TextColor="Red" />
+
+            <Label
+                IsVisible="{Binding SuccessMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                Text="{Binding SuccessMessage}"
+                TextColor="Green" />
+
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    Text="Project Users" />
+
+                <CollectionView ItemsSource="{Binding ProjectUsers}" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="3" Orientation="Vertical" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="dto:ProjectUserGetDto">
+                            <Border
+                                Margin="0,5"
+                                Padding="15"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                                                  Dark={StaticResource Gray900}}"
+                                Stroke="{AppThemeBinding Light={StaticResource Gray200},
+                                                         Dark={StaticResource Gray600}}"
+                                StrokeShape="RoundRectangle 8"
+                                StrokeThickness="1">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="5">
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="16"
+                                            Text="{Binding FirstName, StringFormat='{0}'}" />
+                                        <Label
+                                            FontSize="14"
+                                            Text="{Binding Email}"
+                                            TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                        Dark={StaticResource Gray400}}" />
+                                    </VerticalStackLayout>
+
+                                    <Button
+                                        Grid.Column="1"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleUserAssignmentCommand}"
+                                        CommandParameter="{Binding Email}"
+                                        HeightRequest="40"
+                                        Text="Toggle"
+                                        WidthRequest="100" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <Label
+                            Margin="0,20"
+                            HorizontalOptions="Center"
+                            Text="No users in this project"
+                            TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                        Dark={StaticResource Gray400}}" />
+                    </CollectionView.EmptyView>
+                </CollectionView>
+
+                <Border
+                    Margin="0,10,0,0"
+                    Padding="15"
+                    Stroke="{AppThemeBinding Light={StaticResource Gray200},
+                                             Dark={StaticResource Gray600}}"
+                    StrokeShape="RoundRectangle 8"
+                    StrokeThickness="1">
+                    <VerticalStackLayout Spacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="16"
+                            Text="Assigned Users" />
+
+                        <CollectionView ItemsSource="{Binding AssignedUsers}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="dto:UserGetDto">
+                                    <HorizontalStackLayout Padding="5" Spacing="10">
+                                        <Label
+                                            FontSize="14"
+                                            Text="{Binding FirstName}"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            FontSize="12"
+                                            Text="{Binding Email, StringFormat='({0})'}"
+                                            TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                        Dark={StaticResource Gray400}}"
+                                            VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                            <CollectionView.EmptyView>
+                                <Label
+                                    Padding="5"
+                                    FontSize="12"
+                                    Text="No users assigned to this task"
+                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                Dark={StaticResource Gray400}}" />
+                            </CollectionView.EmptyView>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button
+            Grid.Row="3"
+            Margin="0,20,0,0"
+            Command="{Binding CloseCommand}"
+            HorizontalOptions="Center"
+            Text="Close"
+            WidthRequest="150" />
+    </Grid>
+</ContentPage>

@@ -124,44 +124,77 @@
                                                             <Border.GestureRecognizers>
                                                                 <DragGestureRecognizer DragStarting="OnTaskDragStarting" />
                                                             </Border.GestureRecognizers>
-                                                            <VerticalStackLayout InputTransparent="True" Spacing="5">
-                                                                <Label
-                                                                    FontAttributes="Bold"
-                                                                    FontSize="14"
-                                                                    InputTransparent="True"
-                                                                    Text="{Binding TaskName}" />
-                                                                <Label
-                                                                    FontSize="12"
-                                                                    InputTransparent="True"
-                                                                    IsVisible="{Binding TaskDesc, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
-                                                                    Text="{Binding TaskDesc}"
-                                                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
-                                                                                                Dark={StaticResource Gray400}}" />
-                                                                <Label
-                                                                    FontSize="11"
-                                                                    InputTransparent="True"
-                                                                    IsVisible="{Binding UpdatedAt, Converter={StaticResource IsNotNullConverter}}"
-                                                                    Text="{Binding UpdatedAt, StringFormat='Last Updated At: {0:dd MMMM yyyy}'}"
-                                                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
-                                                                                                Dark={StaticResource Gray400}}" />
-                                                                <Label
-                                                                    FontSize="11"
-                                                                    InputTransparent="True"
-                                                                    IsVisible="{Binding DueDate, Converter={StaticResource IsNotNullConverter}}"
-                                                                    Text="{Binding DueDate, StringFormat='Due: {0:MMM dd, yyyy}'}"
-                                                                    TextColor="Orange" />
-                                                                <HorizontalStackLayout
-                                                                    Margin="0,0,0,0"
+                                                            <Grid RowDefinitions="*,Auto">
+                                                                <VerticalStackLayout
+                                                                    Grid.Row="0"
                                                                     InputTransparent="True"
                                                                     Spacing="5">
                                                                     <Label
-                                                                        FontSize="11"
+                                                                        FontAttributes="Bold"
+                                                                        FontSize="14"
                                                                         InputTransparent="True"
-                                                                        Text="{Binding Users.Count, StringFormat='Users: {0}'}"
+                                                                        Text="{Binding TaskName}"
+                                                                        VerticalOptions="Start" />
+                                                                    <Label
+                                                                        FontSize="12"
+                                                                        InputTransparent="True"
+                                                                        IsVisible="{Binding TaskDesc, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                                                                        Text="{Binding TaskDesc}"
                                                                         TextColor="{AppThemeBinding Light={StaticResource Gray600},
                                                                                                     Dark={StaticResource Gray400}}" />
+                                                                    <Label
+                                                                        FontSize="11"
+                                                                        InputTransparent="True"
+                                                                        IsVisible="{Binding UpdatedAt, Converter={StaticResource IsNotNullConverter}}"
+                                                                        Text="{Binding UpdatedAt, StringFormat='Last Updated At: {0:dd MMMM yyyy}'}"
+                                                                        TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                                                    Dark={StaticResource Gray400}}" />
+                                                                    <Label
+                                                                        FontSize="11"
+                                                                        InputTransparent="True"
+                                                                        IsVisible="{Binding DueDate, Converter={StaticResource IsNotNullConverter}}"
+                                                                        Text="{Binding DueDate, StringFormat='Due: {0:MMM dd, yyyy}'}"
+                                                                        TextColor="Orange" />
+                                                                    <HorizontalStackLayout
+                                                                        Margin="0,0,0,0"
+                                                                        InputTransparent="True"
+                                                                        Spacing="5">
+                                                                        <Label
+                                                                            FontSize="11"
+                                                                            InputTransparent="True"
+                                                                            Text="{Binding Users.Count, StringFormat='Users: {0}'}"
+                                                                            TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                                                        Dark={StaticResource Gray400}}" />
+                                                                    </HorizontalStackLayout>
+                                                                </VerticalStackLayout>
+                                                                <HorizontalStackLayout
+                                                                    Grid.Row="1"
+                                                                    Margin="0,8,0,0"
+                                                                    Spacing="5">
+                                                                    <Button
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditTaskCommand}"
+                                                                        CommandParameter="{Binding .}"
+                                                                        FontSize="10"
+                                                                        HeightRequest="30"
+                                                                        Text="Edit"
+                                                                        WidthRequest="45" />
+                                                                    <Button
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ManageTaskUsersCommand}"
+                                                                        CommandParameter="{Binding .}"
+                                                                        FontSize="10"
+                                                                        HeightRequest="30"
+                                                                        Text="Manage Users"
+                                                                        WidthRequest="95" />
+                                                                    <Button
+                                                                        BackgroundColor="PaleVioletRed"
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CategoryWithTasksViewModel}}, Path=DeleteTaskCommand}"
+                                                                        CommandParameter="{Binding .}"
+                                                                        FontSize="10"
+                                                                        HeightRequest="30"
+                                                                        Text="Delete"
+                                                                        WidthRequest="70" />
                                                                 </HorizontalStackLayout>
-                                                            </VerticalStackLayout>
+                                                            </Grid>
                                                         </Border>
                                                     </DataTemplate>
                                                 </CollectionView.ItemTemplate>

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Desktop.Services;
+using Desktop.Views;
 using Entities.DTO;
 using System.Collections.ObjectModel;
 
@@ -305,6 +306,32 @@ public partial class BoardViewModel : ObservableObject
         {
             IsLoading = false;
         }
+    }
+
+    [RelayCommand]
+    private async System.Threading.Tasks.Task ManageTaskUsersAsync(TaskGetDto? task)
+    {
+        if (task == null || Project == null) return;
+
+        var viewModel = new ManageTaskUsersViewModel(_taskService, task, Project.ProjectUsers.ToList());
+        var popup = new ManageTaskUsersPopup(viewModel);
+        await Shell.Current.Navigation.PushModalAsync(popup);
+    }
+
+    [RelayCommand]
+    private async System.Threading.Tasks.Task EditTaskAsync(TaskGetDto? task)
+    {
+        if (task == null) return;
+
+        var viewModel = new EditTaskViewModel(_taskService, task, async () =>
+        {
+            if (Project != null)
+            {
+                await LoadBoardAsync(Project.ProjectId);
+            }
+        });
+        var popup = new EditTaskPopup(viewModel);
+        await Shell.Current.Navigation.PushModalAsync(popup);
     }
 }
 

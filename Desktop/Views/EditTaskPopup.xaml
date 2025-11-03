@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Desktop.Views.EditTaskPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodels="clr-namespace:Desktop.ViewModels"
+    Title="Edit Task"
+    x:DataType="viewmodels:EditTaskViewModel">
+    
+    <Grid Padding="20" RowDefinitions="Auto,*,Auto">
+        <Label
+            Grid.Row="0"
+            FontAttributes="Bold"
+            FontSize="24"
+            Margin="0,0,0,20"
+            Text="Edit Task" />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="15">
+                <VerticalStackLayout Spacing="8">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        Text="Task Name *" />
+                    <Entry
+                        Placeholder="Enter task name"
+                        Text="{Binding TaskName}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        Text="Description" />
+                    <Editor
+                        AutoSize="TextChanges"
+                        HeightRequest="120"
+                        Placeholder="Enter task description"
+                        Text="{Binding TaskDescription}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        Text="Due Date" />
+                    <HorizontalStackLayout Spacing="10">
+                        <DatePicker
+                            Date="{Binding DueDate}"
+                            Format="MMM dd, yyyy"
+                            HorizontalOptions="FillAndExpand" />
+                        <CheckBox IsChecked="{Binding HasDueDate}" />
+                        <Label
+                            Text="Set due date"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <Label
+                    IsVisible="{Binding ErrorMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                    Text="{Binding ErrorMessage}"
+                    TextColor="Red" />
+
+                <ActivityIndicator
+                    HorizontalOptions="Center"
+                    IsRunning="{Binding IsLoading}"
+                    IsVisible="{Binding IsLoading}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <HorizontalStackLayout
+            Grid.Row="2"
+            Margin="0,20,0,0"
+            HorizontalOptions="Center"
+            Spacing="15">
+            <Button
+                Command="{Binding SaveCommand}"
+                IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                Text="Save"
+                WidthRequest="120" />
+            <Button
+                BackgroundColor="Transparent"
+                BorderColor="{StaticResource Primary}"
+                BorderWidth="1"
+                Command="{Binding CancelCommand}"
+                Text="Cancel"
+                TextColor="{StaticResource Primary}"
+                WidthRequest="120" />
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>
