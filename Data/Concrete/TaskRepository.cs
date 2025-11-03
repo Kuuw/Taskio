@@ -42,28 +42,31 @@ namespace Data.Concrete
                 existingTask.UpdatedAt = task.UpdatedAt;
                 existingTask.SortOrder = task.SortOrder;
 
-                var existingUserIds = existingTask.Users.Select(u => u.UserId).ToList();
-                var newUserIds = task.Users.Select(u => u.UserId).ToList();
-
-                var usersToRemove = existingTask.Users
-                    .Where(u => !newUserIds.Contains(u.UserId))
-                    .ToList();
-
-                var usersToAdd = task.Users
-                    .Where(u => !existingUserIds.Contains(u.UserId))
-                    .ToList();
-
-                foreach (var userToRemove in usersToRemove)
+                if (task.Users != null && _context.Entry(task).Collection(t => t.Users).IsLoaded)
                 {
-                    existingTask.Users.Remove(userToRemove);
-                }
+                    var existingUserIds = existingTask.Users.Select(u => u.UserId).ToList();
+                    var newUserIds = task.Users.Select(u => u.UserId).ToList();
 
-                foreach (var userToAdd in usersToAdd)
-                {
-                    var userEntity = _context.Set<User>().Find(userToAdd.UserId);
-                    if (userEntity != null)
+                    var usersToRemove = existingTask.Users
+                        .Where(u => !newUserIds.Contains(u.UserId))
+                        .ToList();
+
+                    var usersToAdd = task.Users
+                        .Where(u => !existingUserIds.Contains(u.UserId))
+                        .ToList();
+
+                    foreach (var userToRemove in usersToRemove)
                     {
-                        existingTask.Users.Add(userEntity);
+                        existingTask.Users.Remove(userToRemove);
+                    }
+
+                    foreach (var userToAdd in usersToAdd)
+                    {
+                        var userEntity = _context.Set<User>().Find(userToAdd.UserId);
+                        if (userEntity != null)
+                        {
+                            existingTask.Users.Add(userEntity);
+                        }
                     }
                 }
 
