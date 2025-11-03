@@ -205,6 +205,7 @@
                                                 </CollectionView.ItemTemplate>
                                                 <CollectionView.EmptyView>
                                                     <Border
+                                                        HeightRequest="100"
                                                         Stroke="{AppThemeBinding Light={StaticResource Gray400},
                                                                                  Dark={StaticResource Gray500}}"
                                                         StrokeDashArray="4,2"
@@ -212,13 +213,12 @@
                                                         StrokeShape="RoundRectangle 8"
                                                         StrokeThickness="1">
                                                         <Label
-                                                            Margin="0,20,0,0"
                                                             FontSize="14"
-                                                            HeightRequest="95"
                                                             HorizontalOptions="Center"
                                                             Text="No tasks"
                                                             TextColor="{AppThemeBinding Light={StaticResource Gray600},
-                                                                                        Dark={StaticResource Gray400}}" />
+                                                                                        Dark={StaticResource Gray400}}"
+                                                            VerticalOptions="Center" />
                                                     </Border>
                                                 </CollectionView.EmptyView>
                                             </CollectionView>
