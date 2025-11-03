@@ -157,7 +157,7 @@
                                                                         FontSize="11"
                                                                         InputTransparent="True"
                                                                         IsVisible="{Binding DueDate, Converter={StaticResource IsNotNullConverter}}"
-                                                                        Text="{Binding DueDate, StringFormat='Due: {0:MMM dd, yyyy}'}"
+                                                                        Text="{Binding DueDate, StringFormat='Due: {0:dd MMMM yyyy}'}"
                                                                         TextColor="Orange" />
                                                                     <HorizontalStackLayout
                                                                         Margin="0,0,0,0"
