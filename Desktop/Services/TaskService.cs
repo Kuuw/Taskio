@@ -9,6 +9,8 @@ public interface ITaskService
     Task<TaskGetDto?> CreateAsync(TaskPostDto taskData);
     Task<TaskGetDto?> UpdateAsync(TaskPutDto taskData);
     Task<bool> DeleteAsync(Guid taskId);
+    Task<bool> AddUserAsync(Guid taskId, string email);
+    Task<bool> RemoveUserAsync(Guid taskId, string email);
 }
 
 public class TaskService : BaseApiService, ITaskService
@@ -40,5 +42,15 @@ public class TaskService : BaseApiService, ITaskService
     public async Task<bool> DeleteAsync(Guid taskId)
     {
         return await base.DeleteAsync($"/Task/{taskId}");
+    }
+
+    public async Task<bool> AddUserAsync(Guid taskId, string email)
+    {
+        return await PutAsync<bool>($"/Task/AddUser/?taskId={taskId}&email={email}", new { });
+    }
+
+    public async Task<bool> RemoveUserAsync(Guid taskId, string email)
+    {
+        return await PutAsync<bool>($"/Task/RemoveUser/?taskId={taskId}&email={email}", new { });
     }
 }

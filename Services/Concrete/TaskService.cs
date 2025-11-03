@@ -12,13 +12,15 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
 {
     private readonly ITaskRepository _taskRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IUserRepository _userRepository;
     protected readonly IUserContext _userContext;
     private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
 
-    public TaskService(ITaskRepository taskRepository, IProjectRepository projectRepository, IUserContext userContext) : base(taskRepository, userContext)
+    public TaskService(ITaskRepository taskRepository, IProjectRepository projectRepository, IUserRepository userRepository, IUserContext userContext) : base(taskRepository, userContext)
     {
         _taskRepository = taskRepository;
         _projectRepository = projectRepository;
+        _userRepository = userRepository;
         _userContext = userContext;
     }
 
@@ -128,10 +130,7 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
             return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
         }
 
-        var user = _taskRepository.Queryable()
-            .SelectMany(t => t.Users)
-            .FirstOrDefault(u => u.Email == email);
-
+        var user = _userRepository.GetByEmail(email);
         if (user == null)
         {
             return ServiceResult<bool>.NotFound("User not found.");
@@ -149,6 +148,7 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         }
 
         task.Users.Add(user);
+        task.UpdatedAt = DateTime.UtcNow;
         var result = _taskRepository.Update(task);
 
         return ServiceResult<bool>.Ok(result);
@@ -175,6 +175,7 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         }
 
         task.Users.Remove(user);
+        task.UpdatedAt = DateTime.UtcNow;
         var result = _taskRepository.Update(task);
 
         return ServiceResult<bool>.Ok(result);
