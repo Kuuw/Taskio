@@ -56,7 +56,7 @@
         <ScrollView Grid.Row="1">
             <CollectionView ItemsSource="{Binding Projects}" SelectionMode="None">
                 <CollectionView.ItemsLayout>
-                    <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                    <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="dto:ProjectGetDto">
