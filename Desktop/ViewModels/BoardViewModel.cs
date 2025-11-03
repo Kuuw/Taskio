@@ -12,6 +12,7 @@ public partial class BoardViewModel : ObservableObject
     private readonly IProjectService _projectService;
     private readonly ICategoryService _categoryService;
     private readonly ITaskService _taskService;
+    private readonly AuthViewModel _authViewModel;
 
     [ObservableProperty]
     private ProjectGetDto? _project;
@@ -28,11 +29,14 @@ public partial class BoardViewModel : ObservableObject
     [ObservableProperty]
     private string _searchText = string.Empty;
 
-    public BoardViewModel(IProjectService projectService, ICategoryService categoryService, ITaskService taskService)
+    public Guid CurrentUserId => _authViewModel?.CurrentUser?.UserId ?? Guid.Empty;
+
+    public BoardViewModel(IProjectService projectService, ICategoryService categoryService, ITaskService taskService, AuthViewModel authViewModel)
     {
         _projectService = projectService;
         _categoryService = categoryService;
         _taskService = taskService;
+        _authViewModel = authViewModel;
     }
 
     partial void OnSearchTextChanged(string value)

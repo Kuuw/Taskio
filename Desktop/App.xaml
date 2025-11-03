@@ -17,6 +17,7 @@
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:TaskAssignedToUserConverter x:Key="TaskAssignedToUserConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
