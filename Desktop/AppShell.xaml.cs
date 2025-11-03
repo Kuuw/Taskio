@@ -9,9 +9,7 @@ namespace Desktop
             InitializeComponent();
 
             // Register routes for navigation
-            Routing.RegisterRoute(nameof(LoginView), typeof(LoginView));
             Routing.RegisterRoute(nameof(RegisterView), typeof(RegisterView));
-            Routing.RegisterRoute(nameof(ProjectListView), typeof(ProjectListView));
             Routing.RegisterRoute(nameof(ProjectView), typeof(ProjectView));
         }
     }
