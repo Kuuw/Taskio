@@ -48,7 +48,7 @@
         <ScrollView
             Grid.Row="1"
             Padding="5"
-            MaximumHeightRequest="700"
+            MaximumHeightRequest="750"
             Orientation="Horizontal"
             VerticalOptions="Start">
             <HorizontalStackLayout Spacing="15">
@@ -61,7 +61,7 @@
                             <Border
                                 x:Name="CategoryBorder"
                                 Padding="15"
-                                MaximumHeightRequest="650"
+                                MaximumHeightRequest="705"
                                 Stroke="{AppThemeBinding Light={StaticResource Gray200},
                                                          Dark={StaticResource Gray600}}"
                                 StrokeShape="RoundRectangle 10"
@@ -291,9 +291,9 @@
                     StrokeDashOffset="0"
                     StrokeShape="RoundRectangle 10"
                     StrokeThickness="1"
-                    WidthRequest="150">
+                    WidthRequest="210">
                     <VerticalStackLayout Spacing="10" VerticalOptions="Center">
-                        <HorizontalStackLayout Spacing="10">
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
                             <Label
                                 FontSize="16"
                                 Text="+ Add Category"
