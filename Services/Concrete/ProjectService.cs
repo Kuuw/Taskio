@@ -59,6 +59,10 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
 
     public ServiceResult<bool> RemoveUserFromProject(Guid projectId, string email)
     {
+        if (email == _userContext.Email)
+        {
+            return ServiceResult<bool>.BadRequest("You cannot remove yourself from the project. ");
+        }
         var validationResult = ValidateProjectAndAdminAccess(projectId, out var project);
         if (!validationResult.Success)
         {
