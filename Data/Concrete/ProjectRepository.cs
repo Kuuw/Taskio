@@ -15,10 +15,73 @@ namespace Data.Concrete
             _project = _context.Set<Project>();
         }
 
+        public override Project? GetById(Guid id)
+        {
+            return _project
+                .Include(p => p.ProjectUsers)
+                .ThenInclude(pu => pu.User)
+                .FirstOrDefault(p => p.ProjectId == id);
+        }
+
+        public override bool Update(Project project)
+        {
+            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            {
+                var existingProject = _project
+                    .Include(p => p.ProjectUsers)
+                    .FirstOrDefault(p => p.ProjectId == project.ProjectId);
+
+                if (existingProject == null)
+                {
+                    return false;
+                }
+
+                existingProject.ProjectName = project.ProjectName;
+                existingProject.UpdatedAt = project.UpdatedAt;
+
+                var existingUserIds = existingProject.ProjectUsers.Select(pu => pu.UserId).ToList();
+                var newUserIds = project.ProjectUsers.Select(pu => pu.UserId).ToList();
+
+                var usersToRemove = existingProject.ProjectUsers
+                    .Where(pu => !newUserIds.Contains(pu.UserId))
+                    .ToList();
+
+                var usersToAdd = project.ProjectUsers
+                    .Where(pu => !existingUserIds.Contains(pu.UserId))
+                    .ToList();
+
+                foreach (var userToRemove in usersToRemove)
+                {
+                    existingProject.ProjectUsers.Remove(userToRemove);
+                }
+
+                foreach (var userToAdd in usersToAdd)
+                {
+                    existingProject.ProjectUsers.Add(userToAdd);
+                }
+
+                var usersToUpdate = existingProject.ProjectUsers
+                    .Where(pu => newUserIds.Contains(pu.UserId))
+                    .ToList();
+
+                foreach (var existingUser in usersToUpdate)
+                {
+                    var updatedUser = project.ProjectUsers.First(pu => pu.UserId == existingUser.UserId);
+                    existingUser.IsAdmin = updatedUser.IsAdmin;
+                }
+
+                _context.SaveChanges();
+                dbContextTransaction.Commit();
+                return true;
+            }
+        }
+
         public List<Project> getFromUserId(Guid userId)
         {
             var projects = _project
                 .Include(p => p.ProjectUsers)
+                    .ThenInclude(pu => pu.User)
+                .Include(p => p.Categories)
                 .Where(p => p.ProjectUsers.Any(pu => pu.UserId == userId))
                 .ToList();
             return projects;

@@ -42,7 +42,7 @@ namespace Data.Concrete
             }
         }
 
-        public T? GetById(Guid id)
+        public virtual T? GetById(Guid id)
         {
             return data.Find(id);
         }
@@ -64,7 +64,7 @@ namespace Data.Concrete
             return data.ToList();
         }
 
-        public bool Update(T p)
+        public virtual bool Update(T p)
         {
             using (var dbContextTransaction = _context.Database.BeginTransaction())
             {
