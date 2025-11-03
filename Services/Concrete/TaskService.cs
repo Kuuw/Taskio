@@ -85,6 +85,7 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
             return ServiceResult<TaskGetDto>.BadRequest(access.ErrorMessage ?? "Bad Request");
         }
         var task = _mapper.Map<Entities.Models.Task>(taskPutDto);
+        task.UpdatedAt = DateTime.UtcNow;
         var result = _taskRepository.Update(task);
         
         if (result)
