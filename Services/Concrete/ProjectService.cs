@@ -10,12 +10,14 @@ namespace Services.Concrete;
 public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGetDto, ProjectPutDto>, IProjectService
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUserContext _userContext;
     private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
 
-    public ProjectService(IProjectRepository projectRepository, IUserContext userContext) : base(projectRepository, userContext)
+    public ProjectService(IProjectRepository projectRepository, IUserRepository userRepository, IUserContext userContext) : base(projectRepository, userContext)
     {
         _projectRepository = projectRepository;
+        _userRepository = userRepository;
         _userContext = userContext;
     }
 
@@ -34,30 +36,40 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
         return ServiceResult<List<ProjectGetDto>>.Ok(projectDtos);
     }
 
-    public ServiceResult<bool> AddUserToProject(Guid projectId, Guid userId)
+    public ServiceResult<bool> AddUserToProject(Guid projectId, string email)
     {
         var validationResult = ValidateProjectAndAdminAccess(projectId, out var project);
         if (!validationResult.Success)
         {
             return validationResult;
         }
-        if (project.ProjectUsers.Any(pu => pu.UserId == userId))
+        var user = _userRepository.GetByEmail(email);
+        if (user == null)
+        {
+            return ServiceResult<bool>.NotFound("User with this email not found.");
+        }
+        if (project.ProjectUsers.Any(pu => pu.UserId == user.UserId))
         {
             return ServiceResult<bool>.BadRequest("User is already part of the project.");
         }
-        project.ProjectUsers.Add(new ProjectUser { ProjectId = projectId, UserId = userId });
+        project.ProjectUsers.Add(new ProjectUser { ProjectId = projectId, UserId = user.UserId, IsAdmin = false });
         var result = _projectRepository.Update(project);
         return ServiceResult<bool>.Ok(result);
     }
 
-    public ServiceResult<bool> RemoveUserFromProject(Guid projectId, Guid userId)
+    public ServiceResult<bool> RemoveUserFromProject(Guid projectId, string email)
     {
         var validationResult = ValidateProjectAndAdminAccess(projectId, out var project);
         if (!validationResult.Success)
         {
             return validationResult;
         }
-        var projectUser = project.ProjectUsers.FirstOrDefault(pu => pu.UserId == userId);
+        var user = _userRepository.GetByEmail(email);
+        if (user == null)
+        {
+            return ServiceResult<bool>.NotFound("User with this email not found.");
+        }
+        var projectUser = project.ProjectUsers.FirstOrDefault(pu => pu.UserId == user.UserId);
         if (projectUser == null)
         {
             return ServiceResult<bool>.BadRequest("User is not part of the project.");

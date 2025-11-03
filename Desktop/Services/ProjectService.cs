@@ -39,14 +39,14 @@ public class ProjectService : BaseApiService, IProjectService
         return await base.DeleteAsync($"/Project/{projectId}");
     }
 
-    public async Task<bool> AddUserToProjectAsync(Guid projectId, Guid userId)
+    public async Task<bool> AddUserToProjectAsync(Guid projectId, String email)
     {
-        return await PutAsync<bool>($"/Project/AddUser?projectId={projectId}&userId={userId}", new { });
+        return await PutAsync<bool>($"/Project/AddUser?projectId={projectId}&email={email}", new { });
     }
 
-    public async Task<bool> RemoveUserFromProjectAsync(Guid projectId, Guid userId)
+    public async Task<bool> RemoveUserFromProjectAsync(Guid projectId, String email)
     {
-        return await PutAsync<bool>($"/Project/RemoveUser?projectId={projectId}&userId={userId}", new { });
+        return await PutAsync<bool>($"/Project/RemoveUser?projectId={projectId}&email={email}", new { });
     }
 
     public async Task<bool> MakeUserAdminAsync(Guid projectId, Guid userId)

@@ -43,16 +43,16 @@ public class ProjectController : BaseController
 
     [HttpPut]
     [Route("AddUser")]
-    public IActionResult AddUserToProject([FromQuery] Guid projectId, [FromQuery] Guid userId)
+    public IActionResult AddUserToProject([FromQuery] Guid projectId, [FromQuery] String email)
     {
-        return HandleServiceResult(_projectService.AddUserToProject(projectId, userId));
+        return HandleServiceResult(_projectService.AddUserToProject(projectId, email));
     }
 
     [HttpPut]
     [Route("RemoveUser")]
-    public IActionResult RemoveUserFromProject([FromQuery] Guid projectId, [FromQuery] Guid userId)
+    public IActionResult RemoveUserFromProject([FromQuery] Guid projectId, [FromQuery] String email)
     {
-        return HandleServiceResult(_projectService.RemoveUserFromProject(projectId, userId));
+        return HandleServiceResult(_projectService.RemoveUserFromProject(projectId, email));
     }
 
     [HttpPut]

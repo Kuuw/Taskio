@@ -6,8 +6,8 @@ namespace Services.Abstract;
 public interface IProjectService : IGenericService<Project, ProjectPostDto, ProjectGetDto, ProjectPutDto>
 {
     public ServiceResult<List<ProjectGetDto>> Get();
-    public ServiceResult<bool> AddUserToProject(Guid projectId, Guid userId);
-    public ServiceResult<bool> RemoveUserFromProject(Guid projectId, Guid userId);
+    public ServiceResult<bool> AddUserToProject(Guid projectId, String email);
+    public ServiceResult<bool> RemoveUserFromProject(Guid projectId, String email);
     public ServiceResult<bool> SetUserAsAdmin(Guid projectId, Guid userId, bool isAdmin);
     public ServiceResult<ProjectGetDto> Create(ProjectPostDto data);
     public new ServiceResult<bool> Update(ProjectPutDto data);
