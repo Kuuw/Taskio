@@ -9,6 +9,9 @@ public partial class ProjectView : ContentPage, IQueryAttributable
     private readonly BoardViewModel _viewModel;
     private TaskGetDto? _draggedTask;
     private CategoryWithTasksViewModel? _dragOverCategory;
+    private CategoryWithTasksViewModel? _draggedCategory;
+    private CategoryWithTasksViewModel? _draggedTaskSourceCategory;
+    private bool _taskDropHandled;
 
     public ProjectView(BoardViewModel viewModel)
     {
@@ -97,6 +100,8 @@ public partial class ProjectView : ContentPage, IQueryAttributable
         if (task != null)
         {
             _draggedTask = task;
+            _draggedTaskSourceCategory = _viewModel.CategoryColumns.FirstOrDefault(c => c.Category.CategoryId == task.CategoryId);
+            _taskDropHandled = false;
             e.Data.Properties["Task"] = task;
             e.Data.Text = task.TaskId.ToString();
             Debug.WriteLine($"Started dragging task: {task.TaskName} (ID: {task.TaskId}, CategoryId: {task.CategoryId})");
@@ -127,6 +132,13 @@ public partial class ProjectView : ContentPage, IQueryAttributable
     private async void OnCategoryDrop(object? sender, DropEventArgs e)
     {
         Debug.WriteLine($"Drop event triggered. Sender type: {sender?.GetType().Name}");
+
+        if (_taskDropHandled)
+        {
+            Debug.WriteLine("Task drop already handled by OnTaskDrop, skipping category drop");
+            _taskDropHandled = false;
+            return;
+        }
 
         CategoryWithTasksViewModel? targetCategory = FindCategoryFromElement(sender);
 
@@ -214,5 +226,81 @@ public partial class ProjectView : ContentPage, IQueryAttributable
         }
 
         return null;
+    }
+
+    private void OnCategoryHeaderDragStarting(object? sender, DragStartingEventArgs e)
+    {
+        CategoryWithTasksViewModel? category = FindCategoryFromElement(sender);
+        if (category != null)
+        {
+            _draggedCategory = category;
+            e.Data.Properties["Category"] = category;
+            e.Data.Text = category.Category.CategoryId.ToString();
+            Debug.WriteLine($"Started dragging category: {category.Category.CategoryName}");
+        }
+    }
+
+    private void OnCategoryHeaderDragOver(object? sender, DragEventArgs e)
+    {
+        if (_draggedCategory != null)
+        {
+            e.AcceptedOperation = DataPackageOperation.Copy;
+            Debug.WriteLine($"Drag over category header");
+        }
+    }
+
+    private async void OnCategoryHeaderDrop(object? sender, DropEventArgs e)
+    {
+        CategoryWithTasksViewModel? targetCategory = FindCategoryFromElement(sender);
+        
+        if (_draggedCategory != null && targetCategory != null && _draggedCategory != targetCategory)
+        {
+            Debug.WriteLine($"Reordering category '{_draggedCategory.Category.CategoryName}' to position of '{targetCategory.Category.CategoryName}'");
+            await _viewModel.ReorderCategoriesAsync(_draggedCategory, targetCategory);
+        }
+        
+        _draggedCategory = null;
+    }
+
+    private void OnTaskDragOver(object? sender, DragEventArgs e)
+    {
+        if (_draggedTask != null && sender is BindableObject bindable && bindable.BindingContext is TaskGetDto)
+        {
+            e.AcceptedOperation = DataPackageOperation.Copy;
+        }
+    }
+
+    private async void OnTaskDrop(object? sender, DropEventArgs e)
+    {
+        if (_draggedTask == null) return;
+
+        TaskGetDto? targetTask = null;
+        if (sender is BindableObject bindable && bindable.BindingContext is TaskGetDto task)
+        {
+            targetTask = task;
+        }
+
+        if (targetTask != null && _draggedTask.TaskId != targetTask.TaskId)
+        {
+            _taskDropHandled = true;
+            var targetCategory = _viewModel.CategoryColumns.FirstOrDefault(c => c.Category.CategoryId == targetTask.CategoryId);
+            
+            if (targetCategory != null && _draggedTaskSourceCategory != null)
+            {
+                if (_draggedTask.CategoryId == targetTask.CategoryId)
+                {
+                    Debug.WriteLine($"Reordering task '{_draggedTask.TaskName}' within category '{targetCategory.Category.CategoryName}'");
+                    await _viewModel.ReorderTasksAsync(_draggedTask, targetTask, targetCategory);
+                }
+                else
+                {
+                    Debug.WriteLine($"Moving task '{_draggedTask.TaskName}' to category '{targetCategory.Category.CategoryName}' at position of '{targetTask.TaskName}'");
+                    await _viewModel.MoveAndReorderTaskAsync(_draggedTask, targetTask, _draggedTaskSourceCategory, targetCategory);
+                }
+            }
+        }
+
+        _draggedTask = null;
+        _draggedTaskSourceCategory = null;
     }
 }

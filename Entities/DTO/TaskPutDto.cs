@@ -13,4 +13,6 @@ public partial class TaskPutDto
     public string? TaskDesc { get; set; }
 
     public DateTime? DueDate { get; set; }
+
+    public int? SortOrder { get; set; }
 }

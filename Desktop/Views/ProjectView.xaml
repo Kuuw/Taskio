@@ -74,10 +74,12 @@
                                         ColumnSpacing="10"
                                         MaximumHeightRequest="25">
                                         <Grid.GestureRecognizers>
+                                            <DragGestureRecognizer
+                                                DragStarting="OnCategoryHeaderDragStarting" />
                                             <DropGestureRecognizer
                                                 AllowDrop="True"
-                                                DragOver="OnCategoryDragOver"
-                                                Drop="OnCategoryDrop" />
+                                                DragOver="OnCategoryHeaderDragOver"
+                                                Drop="OnCategoryHeaderDrop" />
                                         </Grid.GestureRecognizers>
                                         <Label
                                             FontAttributes="Bold"
@@ -128,6 +130,10 @@
                                                             </Border.Stroke>
                                                             <Border.GestureRecognizers>
                                                                 <DragGestureRecognizer DragStarting="OnTaskDragStarting" />
+                                                                <DropGestureRecognizer
+                                                                    AllowDrop="True"
+                                                                    DragOver="OnTaskDragOver"
+                                                                    Drop="OnTaskDrop" />
                                                             </Border.GestureRecognizers>
                                                             <Grid RowDefinitions="*,Auto">
                                                                 <VerticalStackLayout

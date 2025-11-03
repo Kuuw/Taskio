@@ -337,6 +337,191 @@ public partial class BoardViewModel : ObservableObject
         var popup = new EditTaskPopup(viewModel);
         await Shell.Current.Navigation.PushModalAsync(popup);
     }
+
+    public async System.Threading.Tasks.Task ReorderCategoriesAsync(CategoryWithTasksViewModel draggedCategory, CategoryWithTasksViewModel targetCategory)
+    {
+        IsLoading = true;
+        ErrorMessage = string.Empty;
+        try
+        {
+            int oldIndex = CategoryColumns.IndexOf(draggedCategory);
+            int newIndex = CategoryColumns.IndexOf(targetCategory);
+            
+            if (oldIndex >= 0 && newIndex >= 0 && oldIndex != newIndex)
+            {
+                CategoryColumns.Move(oldIndex, newIndex);
+                
+                for (int i = 0; i < CategoryColumns.Count; i++)
+                {
+                    var category = CategoryColumns[i].Category;
+                    if (category.SortOrder != i)
+                    {
+                        var categoryData = new CategoryPutDto 
+                        { 
+                            CategoryId = category.CategoryId, 
+                            ProjectId = category.ProjectId, 
+                            CategoryName = category.CategoryName, 
+                            SortOrder = i 
+                        };
+                        var updatedCategory = await _categoryService.UpdateAsync(categoryData);
+                        if (updatedCategory != null)
+                        {
+                            CategoryColumns[i].Category = updatedCategory;
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to reorder categories: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async System.Threading.Tasks.Task ReorderTasksAsync(TaskGetDto draggedTask, TaskGetDto targetTask, CategoryWithTasksViewModel category)
+    {
+        IsLoading = true;
+        ErrorMessage = string.Empty;
+        try
+        {
+            int oldIndex = category.Tasks.IndexOf(draggedTask);
+            int newIndex = category.Tasks.IndexOf(targetTask);
+            
+            if (oldIndex >= 0 && newIndex >= 0 && oldIndex != newIndex)
+            {
+                category.Tasks.Move(oldIndex, newIndex);
+                category.FilteredTasks.Clear();
+                foreach (var task in category.Tasks)
+                {
+                    category.FilteredTasks.Add(task);
+                }
+                
+                for (int i = 0; i < category.Tasks.Count; i++)
+                {
+                    var task = category.Tasks[i];
+                    if (task.SortOrder != i)
+                    {
+                        var taskData = new TaskPutDto 
+                        { 
+                            TaskId = task.TaskId, 
+                            ProjectId = task.ProjectId, 
+                            CategoryId = task.CategoryId, 
+                            TaskName = task.TaskName, 
+                            TaskDesc = task.TaskDesc, 
+                            DueDate = task.DueDate,
+                            SortOrder = i
+                        };
+                        var updatedTask = await _taskService.UpdateAsync(taskData);
+                        if (updatedTask != null)
+                        {
+                            category.Tasks[i] = updatedTask;
+                        }
+                    }
+                }
+                
+                category.FilteredTasks.Clear();
+                foreach (var task in category.Tasks)
+                {
+                    category.FilteredTasks.Add(task);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to reorder tasks: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async System.Threading.Tasks.Task MoveAndReorderTaskAsync(TaskGetDto draggedTask, TaskGetDto targetTask, CategoryWithTasksViewModel sourceCategory, CategoryWithTasksViewModel targetCategory)
+    {
+        IsLoading = true;
+        ErrorMessage = string.Empty;
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"MoveAndReorderTaskAsync: Moving '{draggedTask.TaskName}' from '{sourceCategory.Category.CategoryName}' to '{targetCategory.Category.CategoryName}'");
+            
+            var taskData = new TaskPutDto 
+            { 
+                TaskId = draggedTask.TaskId, 
+                ProjectId = draggedTask.ProjectId, 
+                CategoryId = targetCategory.Category.CategoryId, 
+                TaskName = draggedTask.TaskName, 
+                TaskDesc = draggedTask.TaskDesc, 
+                DueDate = draggedTask.DueDate 
+            };
+            
+            var updatedTask = await _taskService.UpdateAsync(taskData);
+            
+            if (updatedTask != null)
+            {
+                var taskToRemove = sourceCategory.Tasks.FirstOrDefault(t => t.TaskId == draggedTask.TaskId);
+                if (taskToRemove != null)
+                {
+                    sourceCategory.Tasks.Remove(taskToRemove);
+                    sourceCategory.FilteredTasks.Remove(taskToRemove);
+                    System.Diagnostics.Debug.WriteLine($"Removed task from source category: {sourceCategory.Category.CategoryName}");
+                }
+                
+                int targetIndex = targetCategory.Tasks.IndexOf(targetTask);
+                if (targetIndex >= 0)
+                {
+                    targetCategory.Tasks.Insert(targetIndex, updatedTask);
+                    targetCategory.FilteredTasks.Insert(targetIndex, updatedTask);
+                }
+                else
+                {
+                    targetCategory.Tasks.Add(updatedTask);
+                    targetCategory.FilteredTasks.Add(updatedTask);
+                }
+                
+                for (int i = 0; i < targetCategory.Tasks.Count; i++)
+                {
+                    var task = targetCategory.Tasks[i];
+                    if (task.SortOrder != i)
+                    {
+                        var updateData = new TaskPutDto 
+                        { 
+                            TaskId = task.TaskId, 
+                            ProjectId = task.ProjectId, 
+                            CategoryId = task.CategoryId, 
+                            TaskName = task.TaskName, 
+                            TaskDesc = task.TaskDesc, 
+                            DueDate = task.DueDate,
+                            SortOrder = i
+                        };
+                        var reorderedTask = await _taskService.UpdateAsync(updateData);
+                        if (reorderedTask != null)
+                        {
+                            targetCategory.Tasks[i] = reorderedTask;
+                        }
+                    }
+                }
+                
+                targetCategory.FilteredTasks.Clear();
+                foreach (var task in targetCategory.Tasks)
+                {
+                    targetCategory.FilteredTasks.Add(task);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ERROR in MoveAndReorderTaskAsync: {ex.Message}");
+            ErrorMessage = $"Failed to move and reorder task: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 }
 
 public partial class CategoryWithTasksViewModel : ObservableObject
