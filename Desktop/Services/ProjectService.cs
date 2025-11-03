@@ -8,8 +8,8 @@ public interface IProjectService
     Task<ProjectGetDto?> CreateAsync(ProjectPostDto projectData);
     Task<ProjectGetDto?> UpdateAsync(ProjectPutDto projectData);
     Task<bool> DeleteAsync(Guid projectId);
-    Task<bool> AddUserToProjectAsync(Guid projectId, Guid userId);
-    Task<bool> RemoveUserFromProjectAsync(Guid projectId, Guid userId);
+    Task<bool> AddUserToProjectAsync(Guid projectId, string email);
+    Task<bool> RemoveUserFromProjectAsync(Guid projectId, string email);
     Task<bool> MakeUserAdminAsync(Guid projectId, Guid userId);
 }
 
@@ -39,12 +39,12 @@ public class ProjectService : BaseApiService, IProjectService
         return await base.DeleteAsync($"/Project/{projectId}");
     }
 
-    public async Task<bool> AddUserToProjectAsync(Guid projectId, String email)
+    public async Task<bool> AddUserToProjectAsync(Guid projectId, string email)
     {
         return await PutAsync<bool>($"/Project/AddUser?projectId={projectId}&email={email}", new { });
     }
 
-    public async Task<bool> RemoveUserFromProjectAsync(Guid projectId, String email)
+    public async Task<bool> RemoveUserFromProjectAsync(Guid projectId, string email)
     {
         return await PutAsync<bool>($"/Project/RemoveUser?projectId={projectId}&email={email}", new { });
     }
