@@ -72,7 +72,7 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectProjectCommand}" CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
                                 <VerticalStackLayout Grid.Column="0" Spacing="5">
                                     <Label
                                         FontAttributes="Bold"
@@ -92,6 +92,14 @@
 
                                 <Button
                                     Grid.Column="1"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ManageProjectUsersCommand}"
+                                    CommandParameter="{Binding .}"
+                                    HeightRequest="40"
+                                    Text="Manage Users"
+                                    WidthRequest="125" />
+
+                                <Button
+                                    Grid.Column="2"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectProjectCommand}"
                                     CommandParameter="{Binding .}"
                                     HeightRequest="40"
@@ -99,7 +107,7 @@
                                     WidthRequest="80" />
 
                                 <Button
-                                    Grid.Column="2"
+                                    Grid.Column="3"
                                     BackgroundColor="PaleVioletRed"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteProjectCommand}"
                                     CommandParameter="{Binding .}"

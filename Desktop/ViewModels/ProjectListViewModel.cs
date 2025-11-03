@@ -166,14 +166,14 @@ public partial class ProjectListViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task AddUserToProjectAsync(Guid userId)
+    private async Task AddUserToProjectAsync(string email)
     {
         if (SelectedProject == null) return;
         IsLoading = true;
         ErrorMessage = string.Empty;
         try
         {
-            var success = await _projectService.AddUserToProjectAsync(SelectedProject.ProjectId, userId);
+            var success = await _projectService.AddUserToProjectAsync(SelectedProject.ProjectId, email);
             if (!success)
             {
                 ErrorMessage = "Failed to add user to project";
@@ -190,14 +190,14 @@ public partial class ProjectListViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task RemoveUserFromProjectAsync(Guid userId)
+    private async Task RemoveUserFromProjectAsync(string email)
     {
         if (SelectedProject == null) return;
         IsLoading = true;
         ErrorMessage = string.Empty;
         try
         {
-            var success = await _projectService.RemoveUserFromProjectAsync(SelectedProject.ProjectId, userId);
+            var success = await _projectService.RemoveUserFromProjectAsync(SelectedProject.ProjectId, email);
             if (!success)
             {
                 ErrorMessage = "Failed to remove user from project";
@@ -235,5 +235,15 @@ public partial class ProjectListViewModel : ObservableObject
         {
             IsLoading = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task ManageProjectUsersAsync(ProjectGetDto? project)
+    {
+        if (project == null) return;
+
+        var viewModel = new ManageProjectUsersViewModel(_projectService, project);
+        var popup = new ManageProjectUsersPopup(viewModel);
+        await Shell.Current.Navigation.PushModalAsync(popup);
     }
 }
