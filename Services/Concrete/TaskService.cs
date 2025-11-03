@@ -26,12 +26,18 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
 
     public ServiceResult<TaskGetDto> Get(Guid guid)
     {
-        var access = ValidateProjectAccess(guid, "get");
+        var task = _taskRepository.GetById(guid);
+        if (task == null)
+        {
+            return ServiceResult<TaskGetDto>.NotFound("Task not found.");
+        }
+        
+        var access = ValidateProjectAccess(task.ProjectId, "get");
         if (access != null)
         {
             return ServiceResult<TaskGetDto>.BadRequest(access.ErrorMessage ?? "Bad Request");
         }
-        var task = _taskRepository.GetById(guid);
+        
         return ServiceResult<TaskGetDto>.Ok(_mapper.Map<TaskGetDto>(task));
     }
 
