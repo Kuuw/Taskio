@@ -24,6 +24,10 @@ public static class MapperExtensions
         cfg.CreateMap<Project, ProjectGetDto>();
         cfg.CreateMap<ProjectPostDto, Project>();
         cfg.CreateMap<ProjectPutDto, Project>();
+        cfg.CreateMap<ProjectUser, ProjectUserGetDto>()
+            .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.FirstName))
+            .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.LastName))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
     }
 
     public static void AddTaskMappings(this IMapperConfigurationExpression cfg)
