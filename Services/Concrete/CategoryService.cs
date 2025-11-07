@@ -26,9 +26,9 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
     public async Task<ServiceResult<List<CategoryGetDto>>> GetFromProjectAsync(Guid id)
     {
         var validationResult = await ValidateCategoryAccessAsync(id, "get");
-        if (validationResult != null)
+        if (!validationResult.Success)
         {
-            return ServiceResult<List<CategoryGetDto>>.Unauthorized(validationResult.ErrorMessage ?? "Unauthorized access to categories.");
+            return new ServiceResult<List<CategoryGetDto>> { ErrorMessage = validationResult.ErrorMessage, StatusCode = validationResult.StatusCode, Success = false };
         }
         var categories = await _categoryRepository.WhereAsync(new List<Func<Category, bool>> { x => x.ProjectId == id });
         var categoryDtos = _mapper.Map<List<CategoryGetDto>>(categories);
@@ -36,20 +36,16 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         return ServiceResult<List<CategoryGetDto>>.Ok(categoryDtos);
     }
 
-    public new async Task<ServiceResult<bool>> DeleteAsync(Guid id)
+    public override async Task<ServiceResult<bool>> DeleteAsync(Guid id)
     {
-        var category = await _categoryRepository.GetByIdAsync(id);
-        if (category == null)
-        {
-            return ServiceResult<bool>.NotFound("Category not found");
-        }
-        
         var validationResult = await ValidateCategoryAccessAsync(id, "delete");
-        if (validationResult != null)
+        if (!validationResult.Success)
         {
             return validationResult;
         }
 
+        var category = (await _categoryRepository.GetByIdAsync(id))!;
+        
         var tasksToDelete = category.Tasks.ToList();
         foreach (var task in tasksToDelete)
         {
@@ -62,9 +58,9 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
     public new async Task<ServiceResult<CategoryGetDto>> UpdateAsync(CategoryPutDto data)
     {
         var validationResult = await ValidateCategoryAccessAsync(data.CategoryId, "update");
-        if (validationResult != null)
+        if (!validationResult.Success)
         {
-            return ServiceResult<CategoryGetDto>.Unauthorized(validationResult.ErrorMessage ?? "Unauthorized");
+            return new ServiceResult<CategoryGetDto> { ErrorMessage = validationResult.ErrorMessage, StatusCode = validationResult.StatusCode, Success = false };
         }
 
         var category = _mapper.Map<Category>(data);
@@ -113,7 +109,7 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         return ServiceResult<CategoryGetDto>.InternalServerError("Failed to create category.");
     }
 
-    private async Task<ServiceResult<bool>?> ValidateCategoryAccessAsync(Guid categoryId, string operation)
+    private async Task<ServiceResult<bool>> ValidateCategoryAccessAsync(Guid categoryId, string operation)
     {
         var category = await _categoryRepository.GetByIdAsync(categoryId);
         if (category == null)
@@ -124,6 +120,6 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         {
             return ServiceResult<bool>.Unauthorized($"You do not have permission to {operation} this category.");
         }
-        return null;
+        return ServiceResult<bool>.Ok(true);
     }
 }

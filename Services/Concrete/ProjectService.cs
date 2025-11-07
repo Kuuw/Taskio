@@ -135,7 +135,7 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
         return ServiceResult<ProjectGetDto>.InternalServerError("Failed to create project.");
     }
 
-    public new async Task<ServiceResult<bool>> UpdateAsync(ProjectPutDto projectDto)
+    public override async Task<ServiceResult<bool>> UpdateAsync(ProjectPutDto projectDto)
     {
         var existingProject = await _projectRepository.GetByIdAsync(projectDto.ProjectId);
         if (existingProject == null)
@@ -152,14 +152,14 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
         return ServiceResult<bool>.Ok(result);
     }
 
-    public new async Task<ServiceResult<bool>> DeleteAsync(Guid projectId)
+    public override async Task<ServiceResult<bool>> DeleteAsync(Guid id)
     {
-        var validationResult = await ValidateProjectAndAdminAccessAsync(projectId);
+        var validationResult = await ValidateProjectAndAdminAccessAsync(id);
         if (!validationResult.Success)
         {
             return ServiceResult<bool>.BadRequest(validationResult.ErrorMessage ?? "Unauthorized");
         }
-        var result = await _projectRepository.DeleteFromIdAsync(projectId);
+        var result = await _projectRepository.DeleteFromIdAsync(id);
         return ServiceResult<bool>.Ok(result);
     }
 

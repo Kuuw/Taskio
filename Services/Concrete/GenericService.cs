@@ -32,7 +32,7 @@ public class GenericService<TModel, TPostDto, TGetDto, TPutDto> : IGenericServic
         return ServiceResult<TGetDto?>.Ok(_mapper.Map<TGetDto?>(model));
     }
 
-    public async Task<ServiceResult<bool>> DeleteAsync(Guid id)
+    public virtual async Task<ServiceResult<bool>> DeleteAsync(Guid id)
     {
         var model = await _repository.GetByIdAsync(id);
         if (model == null)
@@ -42,7 +42,7 @@ public class GenericService<TModel, TPostDto, TGetDto, TPutDto> : IGenericServic
         return ServiceResult<bool>.Ok(await _repository.DeleteAsync(model));
     }
 
-    public async Task<ServiceResult<bool>> UpdateAsync(TPutDto data)
+    public virtual async Task<ServiceResult<bool>> UpdateAsync(TPutDto data)
     {
         var model = _mapper.Map<TModel>(data);
         return ServiceResult<bool>.Ok(await _repository.UpdateAsync(model));

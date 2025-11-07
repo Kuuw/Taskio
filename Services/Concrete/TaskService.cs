@@ -32,9 +32,9 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         }
         
         var access = await ValidateProjectAccessAsync(task.ProjectId, "get");
-        if (access != null)
+        if (!access.Success)
         {
-            return ServiceResult<TaskGetDto>.BadRequest(access.ErrorMessage ?? "Bad Request");
+            return new ServiceResult<TaskGetDto> { ErrorMessage = access.ErrorMessage, StatusCode = access.StatusCode, Success = false };
         }
         
         return ServiceResult<TaskGetDto>.Ok(_mapper.Map<TaskGetDto>(task));
@@ -43,9 +43,9 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
     public async Task<ServiceResult<List<TaskGetDto>>> GetTasksFromProjectAsync(Guid guid)
     {
         var access = await ValidateProjectAccessAsync(guid, "get");
-        if (access != null)
+        if (!access.Success)
         {
-            return ServiceResult<List<TaskGetDto>>.BadRequest(access.ErrorMessage ?? "Bad Request");
+            return new ServiceResult<List<TaskGetDto>> { ErrorMessage = access.ErrorMessage, StatusCode = access.StatusCode, Success = false };
         }
         var project = await _projectRepository.GetByIdAsync(guid);
         var tasks = project!.Tasks;
@@ -55,9 +55,9 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
     public new async Task<ServiceResult<TaskGetDto>> InsertAsync(TaskPostDto taskPostDto)
     {
         var access = await ValidateProjectAccessAsync(taskPostDto.ProjectId, "create in");
-        if (access != null)
+        if (!access.Success)
         {
-            return ServiceResult<TaskGetDto>.BadRequest(access.ErrorMessage ?? "Bad Request");
+            return new ServiceResult<TaskGetDto> { ErrorMessage = access.ErrorMessage, StatusCode = access.StatusCode, Success = false };
         }
         var task = _mapper.Map<Entities.Models.Task>(taskPostDto);
         var result = await _taskRepository.InsertAsync(task);
@@ -86,9 +86,9 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
             return ServiceResult<TaskGetDto>.NotFound("Task not found.");
         }
         var access = await ValidateProjectAccessAsync(existingTask.ProjectId, "update in");
-        if (access != null)
+        if (!access.Success)
         {
-            return ServiceResult<TaskGetDto>.BadRequest(access.ErrorMessage ?? "Bad Request");
+            return new ServiceResult<TaskGetDto> { ErrorMessage = access.ErrorMessage, StatusCode = access.StatusCode, Success = false };
         }
         var task = _mapper.Map<Entities.Models.Task>(taskPutDto);
         task.UpdatedAt = DateTime.UtcNow;
@@ -107,17 +107,17 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         return ServiceResult<TaskGetDto>.InternalServerError("Failed to update task.");
     }
 
-    public new async Task<ServiceResult<bool>> DeleteAsync(Guid taskId)
+    public override async Task<ServiceResult<bool>> DeleteAsync(Guid id)
     {
-        var existingTask = await _taskRepository.GetByIdAsync(taskId);
+        var existingTask = await _taskRepository.GetByIdAsync(id);
         if (existingTask == null)
         {
             return ServiceResult<bool>.NotFound("Task not found.");
         }
         var access = await ValidateProjectAccessAsync(existingTask.ProjectId, "delete from");
-        if (access != null)
+        if (!access.Success)
         {
-            return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
+            return access;
         }
         var result = await _taskRepository.DeleteAsync(existingTask);
         return ServiceResult<bool>.Ok(result);
@@ -132,9 +132,9 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         }
 
         var access = await ValidateProjectAccessAsync(task.ProjectId, "assign users in");
-        if (access != null)
+        if (!access.Success)
         {
-            return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
+            return access;
         }
 
         var user = await _userRepository.GetByEmailAsync(email);
@@ -170,9 +170,9 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         }
 
         var access = await ValidateProjectAccessAsync(task.ProjectId, "remove users from");
-        if (access != null)
+        if (!access.Success)
         {
-            return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
+            return access;
         }
 
         var user = task.Users.FirstOrDefault(u => u.Email == email);
@@ -188,7 +188,7 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         return ServiceResult<bool>.Ok(result);
     }
 
-    private async Task<ServiceResult<bool>?> ValidateProjectAccessAsync(Guid projectId, string operation)
+    private async Task<ServiceResult<bool>> ValidateProjectAccessAsync(Guid projectId, string operation)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
@@ -199,6 +199,6 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         {
             return ServiceResult<bool>.Unauthorized($"You do not have permission to {operation} this project.");
         }
-        return null;
+        return ServiceResult<bool>.Ok(true);
     }
 }
