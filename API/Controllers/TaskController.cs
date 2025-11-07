@@ -18,44 +18,44 @@ public class TaskController : BaseController
     }
 
     [HttpGet("FromProjectId/{id}")]
-    public IActionResult GetTasksFromProject(Guid id)
+    public async Task<IActionResult> GetTasksFromProject(Guid id)
     {
-        return HandleServiceResult(_taskService.GetTasksFromProject(id));
+        return HandleServiceResult(await _taskService.GetTasksFromProjectAsync(id));
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetTask(Guid id)
+    public async Task<IActionResult> GetTask(Guid id)
     {
-        return HandleServiceResult(_taskService.Get(id));
+        return HandleServiceResult(await _taskService.GetAsync(id));
     }
 
     [HttpPost]
-    public IActionResult PostTask(TaskPostDto task)
+    public async Task<IActionResult> PostTask(TaskPostDto task)
     {
-        return HandleServiceResult(_taskService.Insert(task));
+        return HandleServiceResult(await _taskService.InsertAsync(task));
     }
 
     [HttpPut]
-    public IActionResult PutTask(TaskPutDto task)
+    public async Task<IActionResult> PutTask(TaskPutDto task)
     {
-        return HandleServiceResult(_taskService.Update(task));
+        return HandleServiceResult(await _taskService.UpdateAsync(task));
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteTask(Guid id)
+    public async Task<IActionResult> DeleteTask(Guid id)
     {
-        return HandleServiceResult(_taskService.Delete(id));
+        return HandleServiceResult(await _taskService.DeleteAsync(id));
     }
 
     [HttpPut("AddUser")]
-    public IActionResult AddUser(Guid taskId, string email)
+    public async Task<IActionResult> AddUser(Guid taskId, string email)
     {
-        return HandleServiceResult(_taskService.AddUserToTask(taskId, email));
+        return HandleServiceResult(await _taskService.AddUserToTaskAsync(taskId, email));
     }
 
     [HttpPut("RemoveUser")]
-    public IActionResult RemoveUser(Guid taskId, string email)
+    public async Task<IActionResult> RemoveUser(Guid taskId, string email)
     {
-        return HandleServiceResult(_taskService.RemoveUserFromTask(taskId, email));
+        return HandleServiceResult(await _taskService.RemoveUserFromTaskAsync(taskId, email));
     }
 }

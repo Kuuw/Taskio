@@ -1,6 +1,5 @@
 using AutoMapper;
 using Data.Abstract;
-using Data.Concrete;
 using Entities.Context.Abstract;
 using Entities.DTO;
 using Entities.Models;
@@ -14,9 +13,9 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
     private readonly IProjectRepository _projectRepository;
     private readonly IUserRepository _userRepository;
     protected readonly IUserContext _userContext;
-    private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
 
-    public TaskService(ITaskRepository taskRepository, IProjectRepository projectRepository, IUserRepository userRepository, IUserContext userContext) : base(taskRepository, userContext)
+    public TaskService(ITaskRepository taskRepository, IProjectRepository projectRepository, IUserRepository userRepository, IUserContext userContext, IMapper mapper) 
+        : base(taskRepository, userContext, mapper)
     {
         _taskRepository = taskRepository;
         _projectRepository = projectRepository;
@@ -24,15 +23,15 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         _userContext = userContext;
     }
 
-    public ServiceResult<TaskGetDto> Get(Guid guid)
+    public async Task<ServiceResult<TaskGetDto>> GetAsync(Guid guid)
     {
-        var task = _taskRepository.GetById(guid);
+        var task = await _taskRepository.GetByIdAsync(guid);
         if (task == null)
         {
             return ServiceResult<TaskGetDto>.NotFound("Task not found.");
         }
         
-        var access = ValidateProjectAccess(task.ProjectId, "get");
+        var access = await ValidateProjectAccessAsync(task.ProjectId, "get");
         if (access != null)
         {
             return ServiceResult<TaskGetDto>.BadRequest(access.ErrorMessage ?? "Bad Request");
@@ -41,31 +40,32 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         return ServiceResult<TaskGetDto>.Ok(_mapper.Map<TaskGetDto>(task));
     }
 
-    public ServiceResult<List<TaskGetDto>> GetTasksFromProject(Guid guid)
+    public async Task<ServiceResult<List<TaskGetDto>>> GetTasksFromProjectAsync(Guid guid)
     {
-        var access = ValidateProjectAccess(guid, "get");
+        var access = await ValidateProjectAccessAsync(guid, "get");
         if (access != null)
         {
             return ServiceResult<List<TaskGetDto>>.BadRequest(access.ErrorMessage ?? "Bad Request");
         }
-        var tasks = _projectRepository.GetById(guid)!.Tasks;
+        var project = await _projectRepository.GetByIdAsync(guid);
+        var tasks = project!.Tasks;
         return ServiceResult<List<TaskGetDto>>.Ok(_mapper.Map<List<TaskGetDto>>(tasks));
     }
 
-    public new ServiceResult<TaskGetDto> Insert(TaskPostDto taskPostDto)
+    public new async Task<ServiceResult<TaskGetDto>> InsertAsync(TaskPostDto taskPostDto)
     {
-        var access = ValidateProjectAccess(taskPostDto.ProjectId, "create in");
+        var access = await ValidateProjectAccessAsync(taskPostDto.ProjectId, "create in");
         if (access != null)
         {
             return ServiceResult<TaskGetDto>.BadRequest(access.ErrorMessage ?? "Bad Request");
         }
         var task = _mapper.Map<Entities.Models.Task>(taskPostDto);
-        var result = _taskRepository.Insert(task);
+        var result = await _taskRepository.InsertAsync(task);
         
         if (result)
         {
             // Fetch the created task to return full DTO
-            var tasks = _taskRepository.Where(new List<Func<Entities.Models.Task, bool>> { x => x.CategoryId == taskPostDto.CategoryId });
+            var tasks = await _taskRepository.WhereAsync(new List<Func<Entities.Models.Task, bool>> { x => x.CategoryId == taskPostDto.CategoryId });
             var createdTask = tasks.OrderByDescending(t => t.CreatedAt).FirstOrDefault();
             
             if (createdTask != null)
@@ -78,25 +78,25 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         return ServiceResult<TaskGetDto>.InternalServerError("Failed to create task.");
     }
 
-    public new ServiceResult<TaskGetDto> Update(TaskPutDto taskPutDto)
+    public new async Task<ServiceResult<TaskGetDto>> UpdateAsync(TaskPutDto taskPutDto)
     {
-        var existingTask = _taskRepository.GetById(taskPutDto.TaskId);
+        var existingTask = await _taskRepository.GetByIdAsync(taskPutDto.TaskId);
         if (existingTask == null)
         {
             return ServiceResult<TaskGetDto>.NotFound("Task not found.");
         }
-        var access = ValidateProjectAccess(existingTask.ProjectId, "update in");
+        var access = await ValidateProjectAccessAsync(existingTask.ProjectId, "update in");
         if (access != null)
         {
             return ServiceResult<TaskGetDto>.BadRequest(access.ErrorMessage ?? "Bad Request");
         }
         var task = _mapper.Map<Entities.Models.Task>(taskPutDto);
         task.UpdatedAt = DateTime.UtcNow;
-        var result = _taskRepository.Update(task);
+        var result = await _taskRepository.UpdateAsync(task);
         
         if (result)
         {
-            var updatedTask = _taskRepository.GetById(taskPutDto.TaskId);
+            var updatedTask = await _taskRepository.GetByIdAsync(taskPutDto.TaskId);
             if (updatedTask != null)
             {
                 var taskDto = _mapper.Map<TaskGetDto>(updatedTask);
@@ -107,43 +107,43 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
         return ServiceResult<TaskGetDto>.InternalServerError("Failed to update task.");
     }
 
-    public new ServiceResult<bool> Delete(Guid taskId)
+    public new async Task<ServiceResult<bool>> DeleteAsync(Guid taskId)
     {
-        var existingTask = _taskRepository.GetById(taskId);
+        var existingTask = await _taskRepository.GetByIdAsync(taskId);
         if (existingTask == null)
         {
             return ServiceResult<bool>.NotFound("Task not found.");
         }
-        var access = ValidateProjectAccess(existingTask.ProjectId, "delete from");
+        var access = await ValidateProjectAccessAsync(existingTask.ProjectId, "delete from");
         if (access != null)
         {
             return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
         }
-        var result = _taskRepository.Delete(existingTask);
+        var result = await _taskRepository.DeleteAsync(existingTask);
         return ServiceResult<bool>.Ok(result);
     }
 
-    public ServiceResult<bool> AddUserToTask(Guid taskId, string email)
+    public async Task<ServiceResult<bool>> AddUserToTaskAsync(Guid taskId, string email)
     {
-        var task = _taskRepository.GetById(taskId);
+        var task = await _taskRepository.GetByIdAsync(taskId);
         if (task == null)
         {
             return ServiceResult<bool>.NotFound("Task not found.");
         }
 
-        var access = ValidateProjectAccess(task.ProjectId, "assign users in");
+        var access = await ValidateProjectAccessAsync(task.ProjectId, "assign users in");
         if (access != null)
         {
             return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
         }
 
-        var user = _userRepository.GetByEmail(email);
+        var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
         {
             return ServiceResult<bool>.NotFound("User not found.");
         }
 
-        var project = _projectRepository.GetById(task.ProjectId);
+        var project = await _projectRepository.GetByIdAsync(task.ProjectId);
         if (!project!.ProjectUsers.Any(pu => pu.UserId == user.UserId))
         {
             return ServiceResult<bool>.BadRequest("User is not a member of the project.");
@@ -156,20 +156,20 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
 
         task.Users.Add(user);
         task.UpdatedAt = DateTime.UtcNow;
-        var result = _taskRepository.Update(task);
+        var result = await _taskRepository.UpdateAsync(task);
 
         return ServiceResult<bool>.Ok(result);
     }
 
-    public ServiceResult<bool> RemoveUserFromTask(Guid taskId, string email)
+    public async Task<ServiceResult<bool>> RemoveUserFromTaskAsync(Guid taskId, string email)
     {
-        var task = _taskRepository.GetById(taskId);
+        var task = await _taskRepository.GetByIdAsync(taskId);
         if (task == null)
         {
             return ServiceResult<bool>.NotFound("Task not found.");
         }
 
-        var access = ValidateProjectAccess(task.ProjectId, "remove users from");
+        var access = await ValidateProjectAccessAsync(task.ProjectId, "remove users from");
         if (access != null)
         {
             return ServiceResult<bool>.BadRequest(access.ErrorMessage ?? "Bad Request");
@@ -183,14 +183,14 @@ public class TaskService : GenericService<Entities.Models.Task, TaskPostDto, Tas
 
         task.Users.Remove(user);
         task.UpdatedAt = DateTime.UtcNow;
-        var result = _taskRepository.Update(task);
+        var result = await _taskRepository.UpdateAsync(task);
 
         return ServiceResult<bool>.Ok(result);
     }
 
-    private ServiceResult<bool>? ValidateProjectAccess(Guid projectId, string operation)
+    private async Task<ServiceResult<bool>?> ValidateProjectAccessAsync(Guid projectId, string operation)
     {
-        var project = _projectRepository.GetById(projectId);
+        var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
         {
             return ServiceResult<bool>.NotFound("Project not found.");

@@ -1,9 +1,9 @@
-﻿using Entities.Models;
+using Entities.Models;
 
 namespace Data.Abstract
 {
     public interface IProjectRepository : IGenericRepository<Project>
     {
-        public List<Project> getFromUserId(Guid userId);
+        Task<List<Project>> GetFromUserIdAsync(Guid userId);
     }
 }

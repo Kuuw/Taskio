@@ -1,4 +1,4 @@
-﻿using Entities.DTO;
+using Entities.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Abstract;
@@ -18,47 +18,47 @@ public class ProjectController : BaseController
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        return HandleServiceResult(_projectService.Get());
+        return HandleServiceResult(await _projectService.GetAsync());
     }
 
     [HttpPost]
-    public IActionResult CreateProject([FromBody] ProjectPostDto data)
+    public async Task<IActionResult> CreateProject([FromBody] ProjectPostDto data)
     {
-        return HandleServiceResult(_projectService.Create(data));
+        return HandleServiceResult(await _projectService.CreateAsync(data));
     }
 
     [HttpPut]
-    public IActionResult UpdateProject([FromBody] ProjectPutDto data)
+    public async Task<IActionResult> UpdateProject([FromBody] ProjectPutDto data)
     {
-        return HandleServiceResult(_projectService.Update(data));
+        return HandleServiceResult(await _projectService.UpdateAsync(data));
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteProject(Guid id)
+    public async Task<IActionResult> DeleteProject(Guid id)
     {
-        return HandleServiceResult(_projectService.Delete(id));
+        return HandleServiceResult(await _projectService.DeleteAsync(id));
     }
 
     [HttpPut]
     [Route("AddUser")]
-    public IActionResult AddUserToProject([FromQuery] Guid projectId, [FromQuery] string email)
+    public async Task<IActionResult> AddUserToProject([FromQuery] Guid projectId, [FromQuery] string email)
     {
-        return HandleServiceResult(_projectService.AddUserToProject(projectId, email));
+        return HandleServiceResult(await _projectService.AddUserToProjectAsync(projectId, email));
     }
 
     [HttpPut]
     [Route("RemoveUser")]
-    public IActionResult RemoveUserFromProject([FromQuery] Guid projectId, [FromQuery] string email)
+    public async Task<IActionResult> RemoveUserFromProject([FromQuery] Guid projectId, [FromQuery] string email)
     {
-        return HandleServiceResult(_projectService.RemoveUserFromProject(projectId, email));
+        return HandleServiceResult(await _projectService.RemoveUserFromProjectAsync(projectId, email));
     }
 
     [HttpPut]
     [Route("MakeAdmin")]
-    public IActionResult ChangeUserProjectAdmin([FromQuery] Guid projectId, [FromQuery] Guid userId)
+    public async Task<IActionResult> ChangeUserProjectAdmin([FromQuery] Guid projectId, [FromQuery] Guid userId)
     {
-        return HandleServiceResult(_projectService.SetUserAsAdmin(projectId, userId, true));
+        return HandleServiceResult(await _projectService.SetUserAsAdminAsync(projectId, userId, true));
     }
 }

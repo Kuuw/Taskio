@@ -1,7 +1,6 @@
-﻿using Entities.DTO;
+using Entities.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Services.Abstract;
-using Services.Concrete;
 
 namespace API.Controllers;
 
@@ -15,14 +14,14 @@ public class UserController : BaseController
     }
 
     [HttpGet]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
-        return HandleServiceResult(_userService.Get());
+        return HandleServiceResult(await _userService.GetAsync());
     }
 
     [HttpPut]
-    public IActionResult UpdateUser([FromBody] UserPutDto data)
+    public async Task<IActionResult> UpdateUser([FromBody] UserPutDto data)
     {
-        return HandleServiceResult(_userService.Update(data));
+        return HandleServiceResult(await _userService.UpdateAsync(data));
     }
 }

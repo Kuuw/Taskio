@@ -5,12 +5,9 @@ using Entities.DTO;
 using Entities.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Services.Concrete;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Services.Concrete;
 
@@ -19,7 +16,6 @@ public class AuthService : IAuthService
     private readonly IConfiguration _config;
     private readonly IUserRepository _userRepository;
     private readonly IBcryptService _bcryptService;
-    private readonly Mapper mapper = MapperConfig.InitializeAutomapper();
 
     public AuthService(IConfiguration config, IUserRepository repository, IBcryptService bcrypt)
     {
@@ -34,11 +30,6 @@ public class AuthService : IAuthService
         throw new ApplicationException("JWT key is not configured.");
         var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var options = new JsonSerializerOptions
-        {
-            ReferenceHandler = ReferenceHandler.Preserve
-        };
 
         var claims = new[]
         {
@@ -58,10 +49,13 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public ServiceResult<AuthenticateResponse?> Authenticate(UserLogin userLogin)
+    public async Task<ServiceResult<AuthenticateResponse?>> AuthenticateAsync(UserLogin userLogin)
     {
-        var user = _userRepository.GetByEmail(userLogin.Email);
-        if (user == null) { return ServiceResult<AuthenticateResponse?>.BadRequest("Email or password is invalid."); }
+        var user = await _userRepository.GetByEmailAsync(userLogin.Email);
+        if (user == null) 
+        { 
+            return ServiceResult<AuthenticateResponse?>.BadRequest("Email or password is invalid."); 
+        }
 
         if (_bcryptService.VerifyPassword(userLogin.Password, user.Password))
         {

@@ -5,8 +5,8 @@ namespace Services.Abstract;
 
 public interface ICategoryService : IGenericService<Category, CategoryPostDto, CategoryGetDto, CategoryPutDto>
 {
-    public ServiceResult<List<CategoryGetDto>> GetFromProject(Guid id);
-    public new ServiceResult<CategoryGetDto> Insert(CategoryPostDto data);
-    public new ServiceResult<CategoryGetDto> Update(CategoryPutDto data);
-    public new ServiceResult<bool> Delete(Guid id);
+    Task<ServiceResult<List<CategoryGetDto>>> GetFromProjectAsync(Guid id);
+    new Task<ServiceResult<CategoryGetDto>> InsertAsync(CategoryPostDto data);
+    new Task<ServiceResult<CategoryGetDto>> UpdateAsync(CategoryPutDto data);
+    new Task<ServiceResult<bool>> DeleteAsync(Guid id);
 }

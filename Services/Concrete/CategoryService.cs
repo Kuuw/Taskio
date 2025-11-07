@@ -1,6 +1,5 @@
 using AutoMapper;
 using Data.Abstract;
-using Data.Concrete;
 using Entities.Context.Abstract;
 using Entities.DTO;
 using Entities.Models;
@@ -13,10 +12,10 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
     private readonly ICategoryRepository _categoryRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ITaskRepository _taskRepository;
-    private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
     protected readonly IUserContext _userContext;
 
-    public CategoryService(ICategoryRepository categoryRepository, IProjectRepository projectRepository, ITaskRepository taskRepository, IUserContext userContext) : base(categoryRepository, userContext)
+    public CategoryService(ICategoryRepository categoryRepository, IProjectRepository projectRepository, ITaskRepository taskRepository, IUserContext userContext, IMapper mapper) 
+        : base(categoryRepository, userContext, mapper)
     {
         _categoryRepository = categoryRepository;
         _projectRepository = projectRepository;
@@ -24,56 +23,56 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         _userContext = userContext;
     }
 
-    public ServiceResult<List<CategoryGetDto>> GetFromProject(Guid id)
+    public async Task<ServiceResult<List<CategoryGetDto>>> GetFromProjectAsync(Guid id)
     {
-        var validationResult = ValidateCategoryAccess(id, "get");
+        var validationResult = await ValidateCategoryAccessAsync(id, "get");
         if (validationResult != null)
         {
             return ServiceResult<List<CategoryGetDto>>.Unauthorized(validationResult.ErrorMessage ?? "Unauthorized access to categories.");
         }
-        var categories = _categoryRepository.Where(new List<Func<Category, bool>> { x => x.ProjectId == id });
+        var categories = await _categoryRepository.WhereAsync(new List<Func<Category, bool>> { x => x.ProjectId == id });
         var categoryDtos = _mapper.Map<List<CategoryGetDto>>(categories);
 
         return ServiceResult<List<CategoryGetDto>>.Ok(categoryDtos);
     }
 
-    public new ServiceResult<bool> Delete(Guid id)
+    public new async Task<ServiceResult<bool>> DeleteAsync(Guid id)
     {
-        var validationResult = ValidateCategoryAccess(id, "delete");
+        var category = await _categoryRepository.GetByIdAsync(id);
+        if (category == null)
+        {
+            return ServiceResult<bool>.NotFound("Category not found");
+        }
+        
+        var validationResult = await ValidateCategoryAccessAsync(id, "delete");
         if (validationResult != null)
         {
             return validationResult;
         }
 
-        var category = _categoryRepository.GetById(id);
-        if (category == null)
-        {
-            return ServiceResult<bool>.NotFound("Category not found");
-        }
-
         var tasksToDelete = category.Tasks.ToList();
         foreach (var task in tasksToDelete)
         {
-            _taskRepository.Delete(task);
+            await _taskRepository.DeleteAsync(task);
         }
 
-        return base.Delete(id);
+        return await base.DeleteAsync(id);
     }
 
-    public new ServiceResult<CategoryGetDto> Update(CategoryPutDto data)
+    public new async Task<ServiceResult<CategoryGetDto>> UpdateAsync(CategoryPutDto data)
     {
-        var validationResult = ValidateCategoryAccess(data.CategoryId, "update");
+        var validationResult = await ValidateCategoryAccessAsync(data.CategoryId, "update");
         if (validationResult != null)
         {
             return ServiceResult<CategoryGetDto>.Unauthorized(validationResult.ErrorMessage ?? "Unauthorized");
         }
 
         var category = _mapper.Map<Category>(data);
-        var result = _categoryRepository.Update(category);
+        var result = await _categoryRepository.UpdateAsync(category);
 
         if (result)
         {
-            var updatedCategory = _categoryRepository.GetById(data.CategoryId);
+            var updatedCategory = await _categoryRepository.GetByIdAsync(data.CategoryId);
             if (updatedCategory != null)
             {
                 var categoryDto = _mapper.Map<CategoryGetDto>(updatedCategory);
@@ -84,9 +83,9 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         return ServiceResult<CategoryGetDto>.InternalServerError("Failed to update category.");
     }
 
-    public new ServiceResult<CategoryGetDto> Insert(CategoryPostDto data)
+    public new async Task<ServiceResult<CategoryGetDto>> InsertAsync(CategoryPostDto data)
     {
-        var project = _projectRepository.GetById(data.ProjectId);
+        var project = await _projectRepository.GetByIdAsync(data.ProjectId);
         if (project == null)
         {
             return ServiceResult<CategoryGetDto>.NotFound("Project not found.");
@@ -97,11 +96,11 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         }
 
         var category = _mapper.Map<Category>(data);
-        var result = _categoryRepository.Insert(category);
+        var result = await _categoryRepository.InsertAsync(category);
 
         if (result)
         {
-            var categories = _categoryRepository.Where(new List<Func<Category, bool>> { x => x.ProjectId == data.ProjectId });
+            var categories = await _categoryRepository.WhereAsync(new List<Func<Category, bool>> { x => x.ProjectId == data.ProjectId });
             var createdCategory = categories.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
 
             if (createdCategory != null)
@@ -114,9 +113,9 @@ public class CategoryService : GenericService<Category, CategoryPostDto, Categor
         return ServiceResult<CategoryGetDto>.InternalServerError("Failed to create category.");
     }
 
-    private ServiceResult<bool>? ValidateCategoryAccess(Guid categoryId, string operation)
+    private async Task<ServiceResult<bool>?> ValidateCategoryAccessAsync(Guid categoryId, string operation)
     {
-        var category = _categoryRepository.GetById(categoryId);
+        var category = await _categoryRepository.GetByIdAsync(categoryId);
         if (category == null)
         {
             return ServiceResult<bool>.NotFound("Category not found.");

@@ -12,19 +12,19 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
     private readonly IProjectRepository _projectRepository;
     private readonly IUserRepository _userRepository;
     private readonly IUserContext _userContext;
-    private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
 
-    public ProjectService(IProjectRepository projectRepository, IUserRepository userRepository, IUserContext userContext) : base(projectRepository, userContext)
+    public ProjectService(IProjectRepository projectRepository, IUserRepository userRepository, IUserContext userContext, IMapper mapper) 
+        : base(projectRepository, userContext, mapper)
     {
         _projectRepository = projectRepository;
         _userRepository = userRepository;
         _userContext = userContext;
     }
 
-    public ServiceResult<List<ProjectGetDto>> Get()
+    public async Task<ServiceResult<List<ProjectGetDto>>> GetAsync()
     {
         Console.WriteLine(_userContext.UserId);
-        var projects = _projectRepository.getFromUserId(_userContext.UserId);
+        var projects = await _projectRepository.GetFromUserIdAsync(_userContext.UserId);
         Console.WriteLine(projects.Count);
         if (projects == null || !projects.Any())
         {
@@ -36,14 +36,16 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
         return ServiceResult<List<ProjectGetDto>>.Ok(projectDtos);
     }
 
-    public ServiceResult<bool> AddUserToProject(Guid projectId, string email)
+    public async Task<ServiceResult<bool>> AddUserToProjectAsync(Guid projectId, string email)
     {
-        var validationResult = ValidateProjectAndAdminAccess(projectId, out var project);
+        var validationResult = await ValidateProjectAndAdminAccessAsync(projectId);
         if (!validationResult.Success)
         {
-            return validationResult;
+            return ServiceResult<bool>.BadRequest(validationResult.ErrorMessage ?? "Unauthorized");
         }
-        var user = _userRepository.GetByEmail(email);
+        
+        var project = validationResult.Data!;
+        var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
         {
             return ServiceResult<bool>.NotFound("User with this email not found.");
@@ -53,22 +55,24 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
             return ServiceResult<bool>.BadRequest("User is already part of the project.");
         }
         project.ProjectUsers.Add(new ProjectUser { ProjectId = projectId, UserId = user.UserId, IsAdmin = false });
-        var result = _projectRepository.Update(project);
+        var result = await _projectRepository.UpdateAsync(project);
         return ServiceResult<bool>.Ok(result);
     }
 
-    public ServiceResult<bool> RemoveUserFromProject(Guid projectId, string email)
+    public async Task<ServiceResult<bool>> RemoveUserFromProjectAsync(Guid projectId, string email)
     {
         if (email == _userContext.Email)
         {
-            return ServiceResult<bool>.BadRequest("You cannot remove yourself from the project. ");
+            return ServiceResult<bool>.BadRequest("You cannot remove yourself from the project.");
         }
-        var validationResult = ValidateProjectAndAdminAccess(projectId, out var project);
+        var validationResult = await ValidateProjectAndAdminAccessAsync(projectId);
         if (!validationResult.Success)
         {
-            return validationResult;
+            return ServiceResult<bool>.BadRequest(validationResult.ErrorMessage ?? "Unauthorized");
         }
-        var user = _userRepository.GetByEmail(email);
+        
+        var project = validationResult.Data!;
+        var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
         {
             return ServiceResult<bool>.NotFound("User with this email not found.");
@@ -79,28 +83,30 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
             return ServiceResult<bool>.BadRequest("User is not part of the project.");
         }
         project.ProjectUsers.Remove(projectUser);
-        var result = _projectRepository.Update(project);
+        var result = await _projectRepository.UpdateAsync(project);
         return ServiceResult<bool>.Ok(result);
     }
 
-    public ServiceResult<bool> SetUserAsAdmin(Guid projectId, Guid userId, bool isAdmin)
+    public async Task<ServiceResult<bool>> SetUserAsAdminAsync(Guid projectId, Guid userId, bool isAdmin)
     {
-        var validationResult = ValidateProjectAndAdminAccess(projectId, out var project);
+        var validationResult = await ValidateProjectAndAdminAccessAsync(projectId);
         if (!validationResult.Success)
         {
-            return validationResult;
+            return ServiceResult<bool>.BadRequest(validationResult.ErrorMessage ?? "Unauthorized");
         }
+        
+        var project = validationResult.Data!;
         var projectUser = project.ProjectUsers.FirstOrDefault(pu => pu.UserId == userId);
         if (projectUser == null)
         {
             return ServiceResult<bool>.BadRequest("User is not part of the project.");
         }
         projectUser.IsAdmin = isAdmin;
-        var result = _projectRepository.Update(project);
+        var result = await _projectRepository.UpdateAsync(project);
         return ServiceResult<bool>.Ok(result);
     }
 
-    public ServiceResult<ProjectGetDto> Create(ProjectPostDto projectDto)
+    public async Task<ServiceResult<ProjectGetDto>> CreateAsync(ProjectPostDto projectDto)
     {
         var project = _mapper.Map<Project>(projectDto);
         project.ProjectUsers = new List<ProjectUser>
@@ -111,63 +117,63 @@ public class ProjectService : GenericService<Project, ProjectPostDto, ProjectGet
                 IsAdmin = true
             }
         };
-        var result = _projectRepository.Insert(project);
+        var result = await _projectRepository.InsertAsync(project);
         
-     if (result)
+        if (result)
         {
-       // Fetch the created project to return full DTO
-            var projects = _projectRepository.getFromUserId(_userContext.UserId);
+            // Fetch the created project to return full DTO
+            var projects = await _projectRepository.GetFromUserIdAsync(_userContext.UserId);
             var createdProject = projects.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
             
             if (createdProject != null)
-          {
+            {
                 var createdProjectDto = _mapper.Map<ProjectGetDto>(createdProject);
                 return ServiceResult<ProjectGetDto>.Ok(createdProjectDto);
-          }
+            }
         }
         
         return ServiceResult<ProjectGetDto>.InternalServerError("Failed to create project.");
     }
 
-    public new ServiceResult<bool> Update(ProjectPutDto projectDto)
+    public new async Task<ServiceResult<bool>> UpdateAsync(ProjectPutDto projectDto)
     {
-        var existingProject = _projectRepository.GetById(projectDto.ProjectId);
+        var existingProject = await _projectRepository.GetByIdAsync(projectDto.ProjectId);
         if (existingProject == null)
         {
             return ServiceResult<bool>.NotFound("Project not found.");
         }
-        var validationResult = ValidateProjectAndAdminAccess(projectDto.ProjectId, out var project);
+        var validationResult = await ValidateProjectAndAdminAccessAsync(projectDto.ProjectId);
         if (!validationResult.Success)
         {
-            return validationResult;
+            return ServiceResult<bool>.BadRequest(validationResult.ErrorMessage ?? "Unauthorized");
         }
         existingProject.ProjectName = projectDto.ProjectName;
-        var result = _projectRepository.Update(existingProject);
+        var result = await _projectRepository.UpdateAsync(existingProject);
         return ServiceResult<bool>.Ok(result);
     }
 
-    public new ServiceResult<bool> Delete(Guid projectId)
+    public new async Task<ServiceResult<bool>> DeleteAsync(Guid projectId)
     {
-        var validationResult = ValidateProjectAndAdminAccess(projectId, out var project);
+        var validationResult = await ValidateProjectAndAdminAccessAsync(projectId);
         if (!validationResult.Success)
         {
-            return validationResult;
+            return ServiceResult<bool>.BadRequest(validationResult.ErrorMessage ?? "Unauthorized");
         }
-        var result = _projectRepository.DeleteFromId(projectId);
+        var result = await _projectRepository.DeleteFromIdAsync(projectId);
         return ServiceResult<bool>.Ok(result);
     }
 
-    private ServiceResult<bool> ValidateProjectAndAdminAccess(Guid projectId, out Project project)
+    private async Task<ServiceResult<Project>> ValidateProjectAndAdminAccessAsync(Guid projectId)
     {
-        project = _projectRepository.GetById(projectId);
+        var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
         {
-            return ServiceResult<bool>.NotFound("Project not found.");
+            return ServiceResult<Project>.NotFound("Project not found.");
         }
         if (project.ProjectUsers.Any(pu => pu.UserId == _userContext.UserId && !pu.IsAdmin))
         {
-            return ServiceResult<bool>.Forbidden("Only project admins can manage users in the project.");
+            return ServiceResult<Project>.Forbidden("Only project admins can manage users in the project.");
         }
-        return ServiceResult<bool>.Ok(true);
+        return ServiceResult<Project>.Ok(project);
     }
 }

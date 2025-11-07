@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Services.Abstract;
 using Data.Abstract;
 using Entities.Models;
@@ -11,62 +11,46 @@ public class GenericService<TModel, TPostDto, TGetDto, TPutDto> : IGenericServic
 {
     private readonly IGenericRepository<TModel> _repository;
     protected readonly IUserContext _userContext;
-    private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
+    protected readonly IMapper _mapper;
 
-    public GenericService(IGenericRepository<TModel> repository, IUserContext userContext)
+    public GenericService(IGenericRepository<TModel> repository, IUserContext userContext, IMapper mapper)
     {
         _repository = repository;
         _userContext = userContext;
+        _mapper = mapper;
     }
 
-    protected Guid GetCurrentUserId()
-    {
-        if (_userContext.UserId == Guid.Empty)
-        {
-            throw new UnauthorizedAccessException("User is not authenticated");
-        }
-        return _userContext.UserId;
-    }
-
-    public ServiceResult<bool> Insert(TPostDto data)
+    public async Task<ServiceResult<bool>> InsertAsync(TPostDto data)
     {
         var model = _mapper.Map<TModel>(data);
-        return ServiceResult<bool>.Ok(_repository.Insert(model));
+        return ServiceResult<bool>.Ok(await _repository.InsertAsync(model));
     }
 
-    public ServiceResult<TGetDto?> GetById(Guid id)
+    public async Task<ServiceResult<TGetDto?>> GetByIdAsync(Guid id)
     {
-        var model = _repository.GetById(id);
+        var model = await _repository.GetByIdAsync(id);
         return ServiceResult<TGetDto?>.Ok(_mapper.Map<TGetDto?>(model));
     }
 
-    public ServiceResult<bool> Delete(Guid id)
+    public async Task<ServiceResult<bool>> DeleteAsync(Guid id)
     {
-        var model = _repository.GetById(id);
+        var model = await _repository.GetByIdAsync(id);
         if (model == null)
         {
             return ServiceResult<bool>.NotFound($"{typeof(TModel).Name} not found");
         }
-        return ServiceResult<bool>.Ok(_repository.Delete(model));
+        return ServiceResult<bool>.Ok(await _repository.DeleteAsync(model));
     }
 
-    public ServiceResult<bool> Update(TPutDto data)
+    public async Task<ServiceResult<bool>> UpdateAsync(TPutDto data)
     {
-        // Write data to console for debugging purposes
-        Console.WriteLine($"Updating {typeof(TModel).Name} with data: {data}");
-        // Write fields of data to console
-        foreach (var prop in typeof(TPutDto).GetProperties())
-        {
-            Console.WriteLine($"{prop.Name}: {prop.GetValue(data)}");
-        }
-
         var model = _mapper.Map<TModel>(data);
-        return ServiceResult<bool>.Ok(_repository.Update(model));
+        return ServiceResult<bool>.Ok(await _repository.UpdateAsync(model));
     }
 
-    public ServiceResult<List<TGetDto>> GetAll()
+    public async Task<ServiceResult<List<TGetDto>>> GetAllAsync()
     {
-        var models = _mapper.Map<List<TGetDto>>(_repository.List());
+        var models = _mapper.Map<List<TGetDto>>(await _repository.ListAsync());
         return ServiceResult<List<TGetDto>>.Ok(models);
     }
 }

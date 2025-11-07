@@ -1,4 +1,4 @@
-﻿using Data.Abstract;
+using Data.Abstract;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Concrete
@@ -14,66 +14,66 @@ namespace Data.Concrete
             data = _context.Set<T>();
         }
 
-        public bool Delete(T p)
+        public async Task<bool> DeleteAsync(T p)
         {
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            await using (var dbContextTransaction = await _context.Database.BeginTransactionAsync())
             {
                 data.Remove(p);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
-                dbContextTransaction.Commit();
+                await dbContextTransaction.CommitAsync();
                 return true;
             }
         }
 
-        public bool DeleteFromId(Guid id)
+        public async Task<bool> DeleteFromIdAsync(Guid id)
         {
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            await using (var dbContextTransaction = await _context.Database.BeginTransactionAsync())
             {
-                var entity = data.Find(id);
+                var entity = await data.FindAsync(id);
                 if (entity == null)
                 {
                     return false;
                 }
                 data.Remove(entity);
-                _context.SaveChanges();
-                dbContextTransaction.Commit();
+                await _context.SaveChangesAsync();
+                await dbContextTransaction.CommitAsync();
                 return true;
             }
         }
 
-        public virtual T? GetById(Guid id)
+        public virtual async Task<T?> GetByIdAsync(Guid id)
         {
-            return data.Find(id);
+            return await data.FindAsync(id);
         }
 
-        public bool Insert(T p)
+        public async Task<bool> InsertAsync(T p)
         {
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            await using (var dbContextTransaction = await _context.Database.BeginTransactionAsync())
             {
-                data.Add(p);
-                _context.SaveChanges();
+                await data.AddAsync(p);
+                await _context.SaveChangesAsync();
 
-                dbContextTransaction.Commit();
+                await dbContextTransaction.CommitAsync();
                 return true;
             }
         }
 
-        public List<T> List()
+        public async Task<List<T>> ListAsync()
         {
-            return data.ToList();
+            return await data.ToListAsync();
         }
 
-        public virtual bool Update(T p)
+        public virtual async Task<bool> UpdateAsync(T p)
         {
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            await using (var dbContextTransaction = await _context.Database.BeginTransactionAsync())
             {
                 var keyValues = _context.Entry(p).Properties
                     .Where(prop => prop.Metadata.IsPrimaryKey())
                     .Select(prop => prop.CurrentValue)
                     .ToArray();
 
-                var existingEntity = keyValues.Length > 0 ? data.Find(keyValues) : null;
+                var existingEntity = keyValues.Length > 0 ? await data.FindAsync(keyValues) : null;
                 
                 if (existingEntity != null)
                 {
@@ -87,13 +87,13 @@ namespace Data.Concrete
                 }
                 entry.State = EntityState.Modified;
                 
-                _context.SaveChanges();
-                dbContextTransaction.Commit();
+                await _context.SaveChangesAsync();
+                await dbContextTransaction.CommitAsync();
                 return true;
             }
         }
 
-        public List<T> Where(List<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> include = null)
+        public async Task<List<T>> WhereAsync(List<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> include = null)
         {
             var query = data.AsQueryable();
             if (include != null)
@@ -104,7 +104,7 @@ namespace Data.Concrete
             {
                 query = query.Where(pred).AsQueryable();
             }
-            return query.ToList();
+            return await Task.FromResult(query.ToList());
         }
 
         public IQueryable<T> Queryable()

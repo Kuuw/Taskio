@@ -1,4 +1,4 @@
-﻿using Data.Abstract;
+using Data.Abstract;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,20 +15,20 @@ namespace Data.Concrete
             _tasks = _context.Set<Entities.Models.Task>();
         }
 
-        public override Entities.Models.Task? GetById(Guid id)
+        public override async Task<Entities.Models.Task?> GetByIdAsync(Guid id)
         {
-            return _tasks
+            return await _tasks
                 .Include(t => t.Users)
-                .FirstOrDefault(t => t.TaskId == id);
+                .FirstOrDefaultAsync(t => t.TaskId == id);
         }
 
-        public override bool Update(Entities.Models.Task task)
+        public override async Task<bool> UpdateAsync(Entities.Models.Task task)
         {
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            await using (var dbContextTransaction = await _context.Database.BeginTransactionAsync())
             {
-                var existingTask = _tasks
+                var existingTask = await _tasks
                     .Include(t => t.Users)
-                    .FirstOrDefault(t => t.TaskId == task.TaskId);
+                    .FirstOrDefaultAsync(t => t.TaskId == task.TaskId);
 
                 if (existingTask == null)
                 {
@@ -62,7 +62,7 @@ namespace Data.Concrete
 
                     foreach (var userToAdd in usersToAdd)
                     {
-                        var userEntity = _context.Set<User>().Find(userToAdd.UserId);
+                        var userEntity = await _context.Set<User>().FindAsync(userToAdd.UserId);
                         if (userEntity != null)
                         {
                             existingTask.Users.Add(userEntity);
@@ -70,8 +70,8 @@ namespace Data.Concrete
                     }
                 }
 
-                _context.SaveChanges();
-                dbContextTransaction.Commit();
+                await _context.SaveChangesAsync();
+                await dbContextTransaction.CommitAsync();
                 return true;
             }
         }

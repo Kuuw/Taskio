@@ -5,5 +5,5 @@ namespace Services.Abstract;
 
 public interface IAuthService
 {
-    public ServiceResult<AuthenticateResponse?> Authenticate(UserLogin userLogin);
+    Task<ServiceResult<AuthenticateResponse?>> AuthenticateAsync(UserLogin userLogin);
 }

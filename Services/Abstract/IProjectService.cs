@@ -5,11 +5,11 @@ namespace Services.Abstract;
 
 public interface IProjectService : IGenericService<Project, ProjectPostDto, ProjectGetDto, ProjectPutDto>
 {
-    public ServiceResult<List<ProjectGetDto>> Get();
-    public ServiceResult<bool> AddUserToProject(Guid projectId, string email);
-    public ServiceResult<bool> RemoveUserFromProject(Guid projectId, string email);
-    public ServiceResult<bool> SetUserAsAdmin(Guid projectId, Guid userId, bool isAdmin);
-    public ServiceResult<ProjectGetDto> Create(ProjectPostDto data);
-    public new ServiceResult<bool> Update(ProjectPutDto data);
-    public new ServiceResult<bool> Delete(Guid id);
+    Task<ServiceResult<List<ProjectGetDto>>> GetAsync();
+    Task<ServiceResult<bool>> AddUserToProjectAsync(Guid projectId, string email);
+    Task<ServiceResult<bool>> RemoveUserFromProjectAsync(Guid projectId, string email);
+    Task<ServiceResult<bool>> SetUserAsAdminAsync(Guid projectId, Guid userId, bool isAdmin);
+    Task<ServiceResult<ProjectGetDto>> CreateAsync(ProjectPostDto data);
+    new Task<ServiceResult<bool>> UpdateAsync(ProjectPutDto data);
+    new Task<ServiceResult<bool>> DeleteAsync(Guid id);
 }

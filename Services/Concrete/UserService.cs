@@ -12,18 +12,18 @@ public class UserService : GenericService<User, UserRegister, UserGetDto, UserPu
     private readonly IUserRepository _userRepository;
     private readonly IBcryptService _bcryptService;
     protected readonly IUserContext _userContext;
-    private readonly Mapper _mapper = MapperConfig.InitializeAutomapper();
 
-    public UserService(IUserRepository userRepository, IBcryptService bcryptService, IUserContext userContext) : base(userRepository, userContext)
+    public UserService(IUserRepository userRepository, IBcryptService bcryptService, IUserContext userContext, IMapper mapper) 
+        : base(userRepository, userContext, mapper)
     {
         _userRepository = userRepository;
         _bcryptService = bcryptService;
         _userContext = userContext;
     }
 
-    public ServiceResult<UserGetDto?> Register(UserRegister userRegister)
+    public async Task<ServiceResult<UserGetDto?>> RegisterAsync(UserRegister userRegister)
     {
-        var existingUsers = _userRepository.Where(new List<Func<User, bool>> { x => x.Email == userRegister.Email });
+        var existingUsers = await _userRepository.WhereAsync(new List<Func<User, bool>> { x => x.Email == userRegister.Email });
         if (existingUsers != null && existingUsers.Any())
         {
             return ServiceResult<UserGetDto?>.BadRequest("User with this email already exists.");
@@ -36,15 +36,15 @@ public class UserService : GenericService<User, UserRegister, UserGetDto, UserPu
             Password = _bcryptService.HashPassword(userRegister.Password)
         };
 
-        _userRepository.Insert(user);
+        await _userRepository.InsertAsync(user);
 
-        var newUser = _userRepository.GetByEmail(userRegister.Email);
+        var newUser = await _userRepository.GetByEmailAsync(userRegister.Email);
         return ServiceResult<UserGetDto?>.Ok(_mapper.Map<UserGetDto>(newUser));
     }
 
-    public ServiceResult<UserGetDto> Get()
+    public async Task<ServiceResult<UserGetDto>> GetAsync()
     {
-        var user = _userRepository.GetById(_userContext.UserId);
+        var user = await _userRepository.GetByIdAsync(_userContext.UserId);
         if (user == null)
         {
             return ServiceResult<UserGetDto>.NotFound("User not found");
@@ -54,10 +54,10 @@ public class UserService : GenericService<User, UserRegister, UserGetDto, UserPu
         return ServiceResult<UserGetDto>.Ok(userDto);
     }
 
-    public new ServiceResult<bool> Update(UserPutDto userDto)
+    public new async Task<ServiceResult<bool>> UpdateAsync(UserPutDto userDto)
     {
         // Get the existing user from the database
-        var existingUser = _userRepository.GetById(_userContext.UserId);
+        var existingUser = await _userRepository.GetByIdAsync(_userContext.UserId);
 
         if (existingUser == null)
         {
@@ -76,10 +76,10 @@ public class UserService : GenericService<User, UserRegister, UserGetDto, UserPu
 
         if (!string.IsNullOrEmpty(userDto.Email))
         {
-            var emailExists = _userRepository.Where(new List<Func<User, bool>>
-        {
-            x => x.Email == userDto.Email && x.UserId != existingUser.UserId
-        });
+            var emailExists = await _userRepository.WhereAsync(new List<Func<User, bool>>
+            {
+                x => x.Email == userDto.Email && x.UserId != existingUser.UserId
+            });
 
             if (emailExists != null && emailExists.Any())
             {
@@ -94,7 +94,7 @@ public class UserService : GenericService<User, UserRegister, UserGetDto, UserPu
             existingUser.Password = _bcryptService.HashPassword(userDto.Password);
         }
 
-        var updateResult = _userRepository.Update(existingUser);
+        var updateResult = await _userRepository.UpdateAsync(existingUser);
 
         return updateResult
             ? ServiceResult<bool>.Ok(true)

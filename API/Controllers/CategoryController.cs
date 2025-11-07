@@ -20,32 +20,32 @@ public class CategoryController : BaseController
 
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public IActionResult CategoryGet(Guid id)
+    public async Task<IActionResult> CategoryGet(Guid id)
     {
-        return HandleServiceResult(_categoryService.GetById(id));
+        return HandleServiceResult(await _categoryService.GetByIdAsync(id));
     }
 
     [HttpGet("FromProjectId/{id}")]
-    public IActionResult GetCategoriesFromProject(Guid id)
+    public async Task<IActionResult> GetCategoriesFromProject(Guid id)
     {
-        return HandleServiceResult(_categoryService.GetFromProject(id));
+        return HandleServiceResult(await _categoryService.GetFromProjectAsync(id));
     }
 
     [HttpPost]
-    public IActionResult CategoryPost([FromBody] CategoryPostDto data)
+    public async Task<IActionResult> CategoryPost([FromBody] CategoryPostDto data)
     {
-        return HandleServiceResult(_categoryService.Insert(data));
+        return HandleServiceResult(await _categoryService.InsertAsync(data));
     }
 
     [HttpPut]
-    public IActionResult CategoryPut([FromBody] CategoryPutDto data)
+    public async Task<IActionResult> CategoryPut([FromBody] CategoryPutDto data)
     {
-        return HandleServiceResult(_categoryService.Update(data));
+        return HandleServiceResult(await _categoryService.UpdateAsync(data));
     }
 
     [HttpDelete("{id}")]
-    public IActionResult CategoryDelete(Guid id)
+    public async Task<IActionResult> CategoryDelete(Guid id)
     {
-        return HandleServiceResult(_categoryService.Delete(id));
+        return HandleServiceResult(await _categoryService.DeleteAsync(id));
     }
 }

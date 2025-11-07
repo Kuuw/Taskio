@@ -5,7 +5,7 @@ namespace Services.Abstract;
 
 public interface IUserService : IGenericService<User, UserRegister, UserGetDto, UserPutDto>
 {
-    ServiceResult<UserGetDto?> Register(UserRegister userRegister);
-    ServiceResult<UserGetDto> Get();
-    new ServiceResult<bool> Update(UserPutDto userDto);
+    Task<ServiceResult<UserGetDto?>> RegisterAsync(UserRegister userRegister);
+    Task<ServiceResult<UserGetDto>> GetAsync();
+    new Task<ServiceResult<bool>> UpdateAsync(UserPutDto userDto);
 }

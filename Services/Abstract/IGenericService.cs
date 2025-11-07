@@ -1,12 +1,12 @@
-﻿using Entities.Models;
+using Entities.Models;
 
 namespace Services.Abstract;
 
 public interface IGenericService<TModel, TPostDto, TGetDto, TPutDto>
 {
-    ServiceResult<bool> Insert(TPostDto data);
-    ServiceResult<TGetDto?> GetById(Guid id);
-    ServiceResult<bool> Delete(Guid id);
-    ServiceResult<bool> Update(TPutDto data);
-    ServiceResult<List<TGetDto>> GetAll();
+    Task<ServiceResult<bool>> InsertAsync(TPostDto data);
+    Task<ServiceResult<TGetDto?>> GetByIdAsync(Guid id);
+    Task<ServiceResult<bool>> DeleteAsync(Guid id);
+    Task<ServiceResult<bool>> UpdateAsync(TPutDto data);
+    Task<ServiceResult<List<TGetDto>>> GetAllAsync();
 }

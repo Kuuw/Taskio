@@ -5,11 +5,11 @@ namespace Services.Abstract;
 
 public interface ITaskService : IGenericService<Entities.Models.Task, TaskPostDto, TaskGetDto, TaskPutDto>
 {
-    public ServiceResult<TaskGetDto> Get(Guid guid);
-    public ServiceResult<List<TaskGetDto>> GetTasksFromProject(Guid guid);
-    public new ServiceResult<TaskGetDto> Insert(TaskPostDto taskPostDto);
-    public new ServiceResult<TaskGetDto> Update(TaskPutDto taskPutDto);
-    public new ServiceResult<bool> Delete(Guid id);
-    public ServiceResult<bool> AddUserToTask(Guid taskId, string email);
-    public ServiceResult<bool> RemoveUserFromTask(Guid taskId, string email);
+    Task<ServiceResult<TaskGetDto>> GetAsync(Guid guid);
+    Task<ServiceResult<List<TaskGetDto>>> GetTasksFromProjectAsync(Guid guid);
+    new Task<ServiceResult<TaskGetDto>> InsertAsync(TaskPostDto taskPostDto);
+    new Task<ServiceResult<TaskGetDto>> UpdateAsync(TaskPutDto taskPutDto);
+    new Task<ServiceResult<bool>> DeleteAsync(Guid id);
+    Task<ServiceResult<bool>> AddUserToTaskAsync(Guid taskId, string email);
+    Task<ServiceResult<bool>> RemoveUserFromTaskAsync(Guid taskId, string email);
 }

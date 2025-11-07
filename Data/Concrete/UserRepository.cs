@@ -1,4 +1,4 @@
-﻿using Data.Abstract;
+using Data.Abstract;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,9 +15,9 @@ namespace Data.Concrete
             _user = _context.Set<User>();
         }
 
-        public User? GetByEmail(string email)
+        public async Task<User?> GetByEmailAsync(string email)
         {
-            return _user.FirstOrDefault(u => u.Email == email);
+            return await _user.FirstOrDefaultAsync(u => u.Email == email);
         }
     }
 }

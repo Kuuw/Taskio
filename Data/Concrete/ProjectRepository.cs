@@ -1,4 +1,4 @@
-﻿using Data.Abstract;
+using Data.Abstract;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,21 +15,21 @@ namespace Data.Concrete
             _project = _context.Set<Project>();
         }
 
-        public override Project? GetById(Guid id)
+        public override async Task<Project?> GetByIdAsync(Guid id)
         {
-            return _project
+            return await _project
                 .Include(p => p.ProjectUsers)
                 .ThenInclude(pu => pu.User)
-                .FirstOrDefault(p => p.ProjectId == id);
+                .FirstOrDefaultAsync(p => p.ProjectId == id);
         }
 
-        public override bool Update(Project project)
+        public override async Task<bool> UpdateAsync(Project project)
         {
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            await using (var dbContextTransaction = await _context.Database.BeginTransactionAsync())
             {
-                var existingProject = _project
+                var existingProject = await _project
                     .Include(p => p.ProjectUsers)
-                    .FirstOrDefault(p => p.ProjectId == project.ProjectId);
+                    .FirstOrDefaultAsync(p => p.ProjectId == project.ProjectId);
 
                 if (existingProject == null)
                 {
@@ -70,20 +70,20 @@ namespace Data.Concrete
                     existingUser.IsAdmin = updatedUser.IsAdmin;
                 }
 
-                _context.SaveChanges();
-                dbContextTransaction.Commit();
+                await _context.SaveChangesAsync();
+                await dbContextTransaction.CommitAsync();
                 return true;
             }
         }
 
-        public List<Project> getFromUserId(Guid userId)
+        public async Task<List<Project>> GetFromUserIdAsync(Guid userId)
         {
-            var projects = _project
+            var projects = await _project
                 .Include(p => p.ProjectUsers)
                     .ThenInclude(pu => pu.User)
                 .Include(p => p.Categories)
                 .Where(p => p.ProjectUsers.Any(pu => pu.UserId == userId))
-                .ToList();
+                .ToListAsync();
             return projects;
         }
     }

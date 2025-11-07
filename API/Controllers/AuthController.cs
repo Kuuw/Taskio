@@ -1,4 +1,4 @@
-﻿using Services.Abstract;
+using Services.Abstract;
 using Entities.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,15 +20,15 @@ namespace API.Controllers
         }
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] UserLogin data)
+        public async Task<IActionResult> Login([FromBody] UserLogin data)
         {
-            return HandleServiceResult(_authService.Authenticate(data));
+            return HandleServiceResult(await _authService.AuthenticateAsync(data));
         }
 
         [HttpPost("Register")]
-        public IActionResult Register([FromBody] UserRegister data)
+        public async Task<IActionResult> Register([FromBody] UserRegister data)
         {
-            return HandleServiceResult(_userService.Register(data));
+            return HandleServiceResult(await _userService.RegisterAsync(data));
         }
     }
 }

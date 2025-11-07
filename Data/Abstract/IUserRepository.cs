@@ -1,9 +1,9 @@
-﻿using Entities.Models;
+using Entities.Models;
 
 namespace Data.Abstract
 {
     public interface IUserRepository : IGenericRepository<User>
     {
-        public User? GetByEmail(string email);
+        Task<User?> GetByEmailAsync(string email);
     }
 }
