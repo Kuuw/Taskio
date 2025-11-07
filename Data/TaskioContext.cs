@@ -1,17 +1,21 @@
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Data;
 
 public partial class TaskioContext : DbContext
 {
+    private readonly IConfiguration? _configuration;
+
     public TaskioContext()
     {
     }
 
-    public TaskioContext(DbContextOptions<TaskioContext> options)
+    public TaskioContext(DbContextOptions<TaskioContext> options, IConfiguration configuration)
    : base(options)
     {
+        _configuration = configuration;
     }
 
     public virtual DbSet<Category> Categories { get; set; }
@@ -25,9 +29,14 @@ public partial class TaskioContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-      => optionsBuilder
-       .UseLazyLoadingProxies()
-    .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=Taskio;Trusted_Connection=True;integrated security=true;Encrypt=false");
+    {
+        if (!optionsBuilder.IsConfigured && _configuration != null)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            optionsBuilder.UseSqlServer(connectionString)
+                         .UseLazyLoadingProxies();
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
