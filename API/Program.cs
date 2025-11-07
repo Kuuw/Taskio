@@ -92,10 +92,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder => builder.AllowAnyOrigin()
+    var allowedOrigins = config.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+    options.AddPolicy("AllowSpecificOrigins",
+        corsBuilder => corsBuilder.WithOrigins(allowedOrigins)
                           .AllowAnyMethod()
-                          .AllowAnyHeader());
+                          .AllowAnyHeader()
+                          .AllowCredentials());
 });
 
 var app = builder.Build();
@@ -109,7 +111,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors("AllowAll");
+app.UseCors("AllowSpecificOrigins");
 
 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
