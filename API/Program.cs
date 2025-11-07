@@ -5,6 +5,7 @@ using Data.Concrete;
 using Entities.Context.Abstract;
 using Entities.Context.Concrete;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Services.Abstract;
@@ -72,8 +73,16 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
-builder.Services.AddDbContext<TaskioContext>();
-builder.Services.AddScoped<IUserContext>(sp => new UserContext());
+// Configure DbContext with connection string from appsettings.json
+builder.Services.AddDbContext<TaskioContext>((serviceProvider, options) =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    options.UseSqlServer(connectionString)
+           .UseLazyLoadingProxies();
+});
+
+builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
@@ -85,7 +94,6 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IBcryptService, BcryptService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IMapperConfig, MapperConfig>();
 builder.Services.AddAutoMapper(typeof(MapperConfig));
 
 builder.Services.AddControllers();
