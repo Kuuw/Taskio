@@ -1,7 +1,7 @@
 using Services.Concrete;
 using Xunit;
 
-namespace UnitTests.Services;
+namespace UnitTests.Services.Concrete;
 
 public class BcryptServiceTests
 {
