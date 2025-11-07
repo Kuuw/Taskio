@@ -108,6 +108,8 @@ builder.Services.AddCors(options =>
                           .AllowCredentials());
 });
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -131,5 +133,7 @@ app.UseAuthorization();
 app.UseMiddleware<UserContextMiddleware>();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();
