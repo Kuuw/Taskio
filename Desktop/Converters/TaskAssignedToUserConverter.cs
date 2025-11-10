@@ -13,6 +13,11 @@ public class TaskAssignedToUserConverter : IMultiValueConverter
         if (values[0] is not TaskGetDto task || values[1] is not Guid currentUserId)
             return Colors.Transparent;
 
+        if (task.DueDate.HasValue && task.DueDate.Value.Date < DateTime.Today)
+        {
+            return Colors.Red;
+        }
+
         bool isAssigned = task.Users.Any(u => u.UserId == currentUserId);
         
         return isAssigned ? Colors.Green : Colors.Transparent;
